@@ -1,0 +1,127 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;800;900&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+    font-family: "Lyon";
+    src: url("/src/assets/fonts/LyonArabic-DisplayBoldSlanted.ttf") format("truetype");
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Ko Sans";
+    src: url("/src/assets/fonts/KOSans-Regular.otf") format("opentype");
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Ko Sans";
+    src: url("/src/assets/fonts/KOSans-Bold.otf") format("opentype");
+    font-weight: bold;
+    font-style: normal;
+    font-display: swap;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+    overflow-x: hidden; /* ← منع الـ horizontal scroll */
+    max-width: 100%;
+}
+
+body {
+    margin: 0;
+    min-width: 320px;
+    min-height: 100vh;
+    max-width: 100%;
+    overflow-x: hidden; /* ← منع الـ horizontal scroll */
+    background-color: #161616;
+    color: #fcf2ed;
+    font-family: "Ko Sans", "Inter", system-ui, sans-serif;
+    line-height: 1.6;
+    font-weight: 400;
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* ← إزالة الـ padding والـ text-align من #root */
+#root {
+    max-width: 100%;
+    overflow-x: hidden;
+    margin: 0 auto;
+    padding: 0;
+    text-align: unset;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: "Lyon", "Playfair Display", serif;
+    font-weight: 800;
+}
+
+[dir="rtl"] {
+    font-family: "Ko Sans", "Inter", system-ui, sans-serif;
+}
+
+[dir="rtl"] h1,
+[dir="rtl"] h2,
+[dir="rtl"] h3,
+[dir="rtl"] h4,
+[dir="rtl"] h5,
+[dir="rtl"] h6 {
+    font-family: "Lyon Arabic", "Lyon", "Playfair Display", serif;
+}
+
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #1e1e1e;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #3a3a3a;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #4a4a4a;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
+.hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+@keyframes fillProgress {
+    0%   { width: 0%; }
+    100% { width: 100%; }
+}
+
+.animate-fillProgress {
+    animation: fillProgress 5s linear forwards;
+}
+
+.text-primary   { color: #fcf2ed; }
+.text-secondary { color: #898989; }
+.bg-main        { background-color: #161616; }
+.bg-card        { background-color: #1e1e1e; }
