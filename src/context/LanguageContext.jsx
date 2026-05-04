@@ -69,7 +69,7 @@ const translations = {
       about: 'عن واو', terms: 'شروط الخدمة', privacy: 'سياسة الخصوصية',
       cookies: 'ملفات تعريف الارتباط', contact: 'تواصل معنا',
     },
-    categories: { tech: 'تكنولوجيا', horizons: 'ثقافي', social: 'اجتماعي', home: 'الرئيسية', podcast: 'بودكاست' , documentary : 'عام' },
+    categories: { tech: 'تكنولوجيا', horizons: 'ثقافي', social: 'اجتماعي', home: 'عام', podcast: 'بودكاست' , documentary : 'عام' },
     reels: {
       title: 'فيديوهات قصيرة', previous: 'السابق', next: 'التالي',
       watchOnYoutube: 'مشاهدة على يوتيوب', back: 'رجوع',
@@ -88,7 +88,7 @@ const translations = {
     },
     hero: {
       slide1: { category: 'Technology', title: 'Dubai Prepares to Host the Largest Tech Event in the Region and the Future of AI', time: '4 hours ago' },
-      slide2: { category: 'Horizons', title: 'Funding Crisis Looms on Wall Street.. Does it Threaten Companies and Jobs?', time: '6 hours ago' },
+      slide2: { category: 'Cultural', title: 'Funding Crisis Looms on Wall Street.. Does it Threaten Companies and Jobs?', time: '6 hours ago' },
       slide3: { category: 'Social', title: 'Digital Content Creation and Its Impact on Youth in the Modern Era', time: '2 hours ago' },
     },
     mediaCards: {
@@ -129,7 +129,7 @@ const translations = {
       about: 'About WAW', terms: 'Terms of Service', privacy: 'Privacy Policy',
       cookies: 'Cookie Policy', contact: 'Contact Us',
     },
-    categories: { tech: 'Technology', horizons: 'Cultural', social: 'Social', home: 'Home', podcast: 'Podcast' },
+    categories: { tech: 'Technology', horizons: 'Cultural', social: 'Social', home: 'General', podcast: 'Podcast' },
     reels: {
       title: 'Short Clips', previous: 'Previous', next: 'Next',
       watchOnYoutube: 'Watch on YouTube', back: 'Back',

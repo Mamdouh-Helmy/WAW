@@ -4,7 +4,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { api } from '../services/api';
 import { useFetch } from '../hooks/useFetch';
 import LoadingSpinner from './LoadingSpinner';
-import ErrorMessage   from './ErrorMessage';
+import ErrorMessage from './ErrorMessage';
 
 const routeCategoryMap = {
   '/': '', '/tech': 'tech', '/horizons': 'horizons', '/social': 'social', '/podcast': 'podcast',
@@ -24,18 +24,18 @@ const MediaGrid = ({ categoryColor = 'lime' }) => {
 
   const category = routeCategoryMap[location.pathname] ?? '';
   const { data, loading, error } = useFetch(
-  () => api.getArticles(category, 1, language, 6), // ✅ limit = 6
-  [category, language]
-);
+    () => api.getArticles(category, 1, language, 6),
+    [category, language]
+  );
 
   const buttonColors = {
     lime: 'bg-[#CCF47F] text-[#161616]', blue: 'bg-[#4469F2] text-white',
-    yellow: 'bg-[#F7E328] text-black',   red: 'bg-[#E20E3C] text-white',
+    yellow: 'bg-[#F7E328] text-black', red: 'bg-[#E20E3C] text-white',
     phosphor: 'bg-[#CCF47F] text-black',
   };
 
   if (loading) return <LoadingSpinner />;
-  if (error)   return <ErrorMessage />;
+  if (error) return <ErrorMessage />;
 
   return (
     <section className="mb-10">
@@ -67,16 +67,16 @@ const MediaGrid = ({ categoryColor = 'lime' }) => {
 
       {/* Load More */}
       {data?.total > 6 && (
-  <div className="flex justify-center mt-8">
-    <Link
-      to={`/articles${category ? `?category=${category}` : ''}`}
-      className={`group px-8 py-3 rounded-full font-bold text-sm transition-all flex items-center gap-2 ${buttonColors[categoryColor] || buttonColors.lime}`}
-    >
-      {dir === 'rtl' ? 'عرض كل المقالات' : 'View All Articles'}
-      <i className={`fa-solid fa-arrow-${dir === 'rtl' ? 'left' : 'right'} transition-transform group-hover:translate-x-1`} />
-    </Link>
-  </div>
-)}
+        <div className="flex justify-center mt-8">
+          <Link
+            to={`/articles${category ? `?category=${category}` : ''}`}
+            className={`group px-8 py-3 rounded-full font-bold text-sm transition-all flex items-center gap-2 ${buttonColors[categoryColor] || buttonColors.lime}`}
+          >
+            {dir === 'rtl' ? 'عرض كل المقالات' : 'View All Articles'}
+            <i className={`fa-solid fa-arrow-${dir === 'rtl' ? 'left' : 'right'} transition-transform group-hover:translate-x-1`} />
+          </Link>
+        </div>
+      )}
     </section>
   );
 };

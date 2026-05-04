@@ -2,362 +2,461 @@ import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
 
-// ── Config per category ────────────────────────────────────────────────────────
-const CATEGORY_CONFIG = {
+/* ─────────────────────────────────────────────────────────────
+   Config — كل dropdown بيتحكم فيه من هنا
+───────────────────────────────────────────────────────────── */
+const DROPDOWN_CONFIG = {
   tech: {
-    reelLabel:    { ar: 'واو 404',    en: 'WAW 404'   },
-    sectionColor: '#4469F2',
-    sectionBg:    'rgba(68,105,242,0.10)',
+    reelCategory:     'technology',
+    articleCategory:  'tech',
+    excludeVideoType: false,   // tech يعرض كل أنواع المقالات
+    accentColor:      '#4469F2',
+    accentBg:         'rgba(68,105,242,0.12)',
+    accentBorder:     'rgba(68,105,242,0.25)',
+    labelAr:          'تكنولوجي',
   },
-  horizons: {
-    reelLabel:    { ar: 'محسوبة',     en: 'Mahsouba'  },
-    sectionColor: '#F7E328',
-    sectionBg:    'rgba(247,227,40,0.10)',
+  cultural: {
+    reelCategory:     'cultural',
+    articleCategory:  'horizons',
+    excludeVideoType: true,    // ثقافي يخفي مقالات نوعها video
+    accentColor:      '#F7E328',
+    accentBg:         'rgba(247,227,40,0.12)',
+    accentBorder:     'rgba(247,227,40,0.25)',
+    labelAr:          'ثقافي',
   },
   social: {
-    reelLabel:    { ar: 'من واو لزد', en: 'From WAW to Zed' },
-    sectionColor: '#E20E3C',
-    sectionBg:    'rgba(226,14,60,0.10)',
+    reelCategory:     'social',
+    articleCategory:  'social',
+    excludeVideoType: false,
+    accentColor:      '#E20E3C',
+    accentBg:         'rgba(226,14,60,0.12)',
+    accentBorder:     'rgba(226,14,60,0.25)',
+    labelAr:          'اجتماعي',
   },
 };
 
-// ── Mini Reel Card ─────────────────────────────────────────────────────────────
-const ReelCard = ({ reel, color, language, navigate, onClose }) => {
+/* ─────────────────────────────────────────────────────────────
+   YouTube thumbnail helper
+───────────────────────────────────────────────────────────── */
+const getYoutubeThumbnail = (url) => {
+  if (!url) return null;
+  try {
+    const u = new URL(url);
+    let id = null;
+    if (u.searchParams.get('v'))               id = u.searchParams.get('v');
+    else if (u.hostname === 'youtu.be')         id = u.pathname.slice(1);
+    else if (u.pathname.startsWith('/shorts/')) id = u.pathname.replace('/shorts/', '');
+    else if (u.pathname.startsWith('/embed/'))  id = u.pathname.replace('/embed/', '');
+    return id ? `https://img.youtube.com/vi/${id}/hqdefault.jpg` : null;
+  } catch { return null; }
+};
+
+/* ─────────────────────────────────────────────────────────────
+   Reel Card — بطاقة ريل صغيرة في الـ dropdown
+───────────────────────────────────────────────────────────── */
+const ReelCard = ({ reel, accentColor, navigate, language }) => {
+  const thumb = reel.thumbnail || getYoutubeThumbnail(reel.youtubeUrl);
   const [hovered, setHovered] = useState(false);
-
-  const getYtThumb = (url) => {
-    if (!url) return null;
-    const m = url.match(/(?:youtu\.be\/|v=|shorts\/)([A-Za-z0-9_-]{11})/);
-    return m ? `https://img.youtube.com/vi/${m[1]}/mqdefault.jpg` : null;
-  };
-
-  const thumb = reel.thumbnail || getYtThumb(reel.youtubeUrl);
 
   return (
     <div
-      onClick={() => { navigate(`/reel/${reel._id}`); onClose(); }}
+      onClick={() => navigate(`/reels/${reel._id}?lang=${language}`)}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
-        position: 'relative',
-        borderRadius: 10,
-        overflow: 'hidden',
         cursor: 'pointer',
-        aspectRatio: '16/9',
-        background: '#111',
+        borderRadius: '10px',
+        overflow: 'hidden',
+        border: hovered
+          ? `1px solid ${accentColor}55`
+          : '1px solid rgba(255,255,255,0.06)',
+        transition: 'border-color 0.15s, transform 0.15s',
+        transform: hovered ? 'translateY(-2px)' : 'translateY(0)',
+        background: '#181818',
         flexShrink: 0,
-        border: hovered ? `1.5px solid ${color}` : '1.5px solid transparent',
-        transition: 'border 0.18s, transform 0.18s',
-        transform: hovered ? 'scale(1.03)' : 'scale(1)',
+        width: '90px',
       }}
     >
-      {thumb ? (
-        <img src={thumb} alt={reel.title} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-      ) : (
-        <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#1a1a1a' }}>
-          <i className="fa-solid fa-play-circle" style={{ fontSize: 28, color: '#333' }} />
-        </div>
-      )}
-
-      {/* Play overlay */}
+      {/* Thumbnail — 9:16 */}
       <div style={{
-        position: 'absolute', inset: 0,
-        background: hovered ? 'rgba(0,0,0,0.35)' : 'rgba(0,0,0,0.15)',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        transition: 'background 0.18s',
+        width: '90px',
+        height: '30px',
+        position: 'relative',
+        background: '#181818',
+        overflow: 'hidden',
       }}>
-        <div style={{
-          width: 32, height: 32, borderRadius: '50%',
-          background: hovered ? color : 'rgba(255,255,255,0.2)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          transition: 'background 0.18s',
-        }}>
-          <i className="fa-solid fa-play" style={{ fontSize: 11, color: hovered ? '#000' : '#fff', marginLeft: 2 }} />
-        </div>
+        {thumb ? (
+          <img
+            src={thumb}
+            alt={reel.title}
+            style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+          />
+        ) : (
+          <div style={{
+            width: '100%', height: '100%',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            color: 'rgba(255,255,255,0.08)', fontSize: '1.4rem',
+          }}>▶</div>
+        )}
+        {/* play overlay on hover */}
+        {hovered && (
+          <div style={{
+            position: 'absolute', inset: 0,
+            background: 'rgba(0,0,0,0.35)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            <div style={{
+              width: '28px', height: '28px', borderRadius: '50%',
+              background: accentColor,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              <svg width="10" height="12" viewBox="0 0 10 12" fill="none">
+                <path d="M1 1L9 6L1 11V1Z" fill="#161616" />
+              </svg>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Title */}
-      <div style={{
-        position: 'absolute', bottom: 0, left: 0, right: 0,
-        background: 'linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 100%)',
-        padding: '20px 8px 6px',
-      }}>
+      <div style={{ padding: '6px 8px' }}>
         <p style={{
-          color: '#fff', fontSize: 11, fontFamily: 'Lyon, serif',
-          margin: 0, lineHeight: 1.3, direction: language === 'ar' ? 'rtl' : 'ltr',
-          overflow: 'hidden', display: '-webkit-box',
-          WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
-        }}>{reel.title}</p>
+          color: hovered ? '#FCF2ED' : '#898989',
+          fontSize: '0.65rem',
+          fontFamily: 'Lyon, serif',
+          margin: 0,
+          lineHeight: 1.4,
+          display: '-webkit-box',
+          WebkitLineClamp: 2,
+          WebkitBoxOrient: 'vertical',
+          overflow: 'hidden',
+          transition: 'color 0.15s',
+          background: '#181818',
+        }}>{reel.title || '—'}</p>
       </div>
     </div>
   );
 };
 
-// ── Mini Article Row ───────────────────────────────────────────────────────────
-const ArticleRow = ({ article, color, language, navigate, onClose, isLast }) => {
+/* ─────────────────────────────────────────────────────────────
+   Article Row — صف مقالة في الـ dropdown
+───────────────────────────────────────────────────────────── */
+const ArticleRow = ({ article, accentColor, navigate, language }) => {
   const [hovered, setHovered] = useState(false);
-  const dir = language === 'ar' ? 'rtl' : 'ltr';
 
   return (
     <div
-      onClick={() => { navigate(`/article/${article._id}`); onClose(); }}
+      onClick={() => navigate(`/article/${article._id}?lang=${language}`)}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
-        display: 'flex', alignItems: 'center', gap: 10,
-        padding: '9px 12px', cursor: 'pointer', direction: dir,
-        borderRadius: 8,
-        borderBottom: !isLast ? '1px solid rgba(255,255,255,0.05)' : 'none',
+        display: 'flex', alignItems: 'center', gap: '10px',
+        padding: '8px 10px', borderRadius: '10px',
+        cursor: 'pointer',
         background: hovered ? 'rgba(255,255,255,0.04)' : 'transparent',
         transition: 'background 0.15s',
       }}
     >
-      {article.thumbnail && (
-        <img src={article.thumbnail} alt="" style={{
-          width: 44, height: 44, borderRadius: 6, objectFit: 'cover',
-          flexShrink: 0, border: '1px solid rgba(255,255,255,0.06)',
-        }} />
-      )}
+      {/* Thumbnail */}
+      <div style={{
+        width: '48px', height: '34px',
+        borderRadius: '6px', flexShrink: 0,
+        background: '#111',
+        backgroundImage: article.thumbnail ? `url('${article.thumbnail}')` : 'none',
+        backgroundSize: 'cover', backgroundPosition: 'center',
+        border: '1px solid rgba(255,255,255,0.06)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+      }}>
+        {!article.thumbnail && (
+          <span style={{ color: 'rgba(255,255,255,0.1)', fontSize: '0.75rem' }}>✦</span>
+        )}
+      </div>
+
+      {/* Text */}
       <p style={{
-        flex: 1, color: hovered ? '#FCF2ED' : '#bbb',
-        fontSize: 12.5, fontFamily: 'Lyon, serif',
+        color: hovered ? '#FCF2ED' : '#898989',
+        fontSize: '0.75rem', fontFamily: 'Lyon, serif',
         margin: 0, lineHeight: 1.4,
-        overflow: 'hidden', display: '-webkit-box',
-        WebkitLineClamp: 2, WebkitBoxOrient: 'vertical',
+        flex: 1, overflow: 'hidden',
+        display: '-webkit-box', WebkitLineClamp: 2,
+        WebkitBoxOrient: 'vertical',
         transition: 'color 0.15s',
-      }}>{article.title}</p>
-      <i
-        className={`fa-solid fa-chevron-${dir === 'rtl' ? 'left' : 'right'}`}
-        style={{ fontSize: 9, color: hovered ? color : '#444', flexShrink: 0, transition: 'color 0.15s' }}
-      />
+      }}>{article.title || '—'}</p>
+
+      {/* Arrow */}
+      <svg
+        width="10" height="10" viewBox="0 0 10 10" fill="none"
+        style={{ flexShrink: 0, opacity: hovered ? 0.6 : 0.2, transition: 'opacity 0.15s' }}
+      >
+        <path d="M7 1.5L1.5 7M7 1.5H2.5M7 1.5V6"
+          stroke={accentColor} strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
     </div>
   );
 };
 
-// ── Main Dropdown ──────────────────────────────────────────────────────────────
+/* ─────────────────────────────────────────────────────────────
+   NavDropdown — المكون الرئيسي
+───────────────────────────────────────────────────────────── */
 const NavDropdown = ({ category, language, dir, children }) => {
-  const [open, setOpen]         = useState(false);
-  const [reels, setReels]       = useState([]);
-  const [articles, setArticles] = useState([]);
-  const [loading, setLoading]   = useState(false);
-  const [fetched, setFetched]   = useState(false);
+  const navigate    = useNavigate();
+  const config      = DROPDOWN_CONFIG[category];
   const containerRef = useRef(null);
-  const closeTimer   = useRef(null);
-  const navigate     = useNavigate();
 
-  const cfg   = CATEGORY_CONFIG[category] || CATEGORY_CONFIG.tech;
-  const color = cfg.sectionColor;
+  const [open,     setOpen]     = useState(false);
+  const [reels,    setReels]    = useState([]);
+  const [articles, setArticles] = useState([]);
+  const [loading,  setLoading]  = useState(false);
+  const [fetched,  setFetched]  = useState(false);
 
+  const hoverTimer  = useRef(null);
+  const leaveTimer  = useRef(null);
+
+  /* جلب البيانات مرة واحدة بس عند أول hover */
   const fetchData = async () => {
-    if (fetched) return;
+    if (fetched || loading) return;
     setLoading(true);
     try {
-      const [reelRes, artRes] = await Promise.all([
-        api.getReels(language, 1),
-        api.getArticles(category, 1, language, 3),
+      const [reelsRes, articlesRes] = await Promise.all([
+        api.getReels(language, 1, config.reelCategory),
+        api.getArticles(config.articleCategory, 1, language, 6),
       ]);
-      setReels((reelRes?.reels || []).slice(0, 4));
-      setArticles(artRes?.articles || []);
+
+      setReels((reelsRes.reels || []).slice(0, 4));
+
+      // فلتر المقالات: لو excludeVideoType = true نشيل اللي type = 'video'
+      const allArticles = articlesRes.articles || [];
+      const filtered    = config.excludeVideoType
+        ? allArticles.filter(a => a.type !== 'video')
+        : allArticles;
+      setArticles(filtered.slice(0, 4));
+    } catch (e) {
+      console.error('NavDropdown fetch error:', e);
+    } finally {
+      setLoading(false);
       setFetched(true);
-    } catch { /* silent */ }
-    finally { setLoading(false); }
+    }
   };
 
   const handleMouseEnter = () => {
-    clearTimeout(closeTimer.current);
-    setOpen(true);
-    fetchData();
+    clearTimeout(leaveTimer.current);
+    hoverTimer.current = setTimeout(() => {
+      setOpen(true);
+      fetchData();
+    }, 80);
   };
 
   const handleMouseLeave = () => {
-    closeTimer.current = setTimeout(() => setOpen(false), 180);
+    clearTimeout(hoverTimer.current);
+    leaveTimer.current = setTimeout(() => setOpen(false), 120);
   };
 
-  useEffect(() => () => clearTimeout(closeTimer.current), []);
+  /* إغلاق بالضغط بره */
+  useEffect(() => {
+    const handler = (e) => {
+      if (containerRef.current && !containerRef.current.contains(e.target)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
 
-  const goToReels = () => { navigate(`/${category}#reels`); setOpen(false); };
-  const goToAll   = () => { navigate(`/${category}`);       setOpen(false); };
+  if (!config) return children;
 
-  const reelLabel   = cfg.reelLabel[language] || cfg.reelLabel.ar;
-  const isRtl       = language === 'ar';
+  const { accentColor, accentBg, accentBorder, labelAr } = config;
+  const hasReels    = reels.length > 0;
+  const hasArticles = articles.length > 0;
 
   return (
     <div
       ref={containerRef}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      style={{ position: 'relative' }}
+      style={{ position: 'relative', display: 'inline-block' }}
     >
+      {/* Trigger — children = NavLink */}
       {children}
 
+      {/* Dropdown Panel */}
       {open && (
         <div
           style={{
             position: 'absolute',
-            top: 'calc(100% + 12px)',
-            [isRtl ? 'right' : 'left']: '50%',
-            transform: `translateX(${isRtl ? '50%' : '-50%'})`,
-            width: 480,
-            background: '#141414',
-            border: '1px solid rgba(255,255,255,0.09)',
-            borderRadius: 16,
-            boxShadow: '0 24px 64px rgba(0,0,0,0.6)',
+            top: 'calc(100% + 10px)',
+            [dir === 'rtl' ? 'right' : 'left']: '50%',
+            transform: dir === 'rtl' ? 'translateX(50%)' : 'translateX(-50%)',
+            width: '420px',
+            background: '#181818',
+            border: '1px solid rgba(255,255,255,0.08)',
+            borderRadius: '18px',
+            boxShadow: '0 24px 60px rgba(0,0,0,0.6)',
+            zIndex: 200,
             overflow: 'hidden',
-            zIndex: 300,
-            animation: 'ddFadeIn 0.18s ease',
+            animation: 'dropIn 0.15s ease',
+            fontFamily: 'Lyon, serif',
           }}
-          onMouseEnter={handleMouseEnter}
-          onMouseLeave={handleMouseLeave}
+          dir={dir}
         >
           <style>{`
-            @keyframes ddFadeIn {
-              from { opacity:0; transform:translateX(${isRtl ? '50%' : '-50%'}) translateY(-8px); }
-              to   { opacity:1; transform:translateX(${isRtl ? '50%' : '-50%'}) translateY(0); }
+            @keyframes dropIn {
+              from { opacity: 0; transform: ${dir === 'rtl' ? 'translateX(50%)' : 'translateX(-50%)'} translateY(-6px); }
+              to   { opacity: 1; transform: ${dir === 'rtl' ? 'translateX(50%)' : 'translateX(-50%)'} translateY(0); }
             }
+            @keyframes spin { to { transform: rotate(360deg); } }
           `}</style>
 
-          {/* ── Reels Section ── */}
-          <div style={{ padding: '14px 14px 10px' }}>
-            <div style={{
-              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-              marginBottom: 10, direction: isRtl ? 'rtl' : 'ltr',
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-                <div style={{ width: 3, height: 14, borderRadius: 2, background: color }} />
-                <span style={{
-                  fontSize: 12, fontWeight: 700, color: color,
-                  fontFamily: "'Ko Sans', sans-serif", letterSpacing: 0.3,
-                }}>{reelLabel}</span>
-                <span style={{
-                  fontSize: 10, color: '#555',
-                  fontFamily: "'Ko Sans', sans-serif",
-                }}>{isRtl ? 'ريلز' : 'Reels'}</span>
-              </div>
-              {/* <button
-                onClick={goToReels}
-                style={{
-                  fontSize: 11, color: color, background: 'transparent',
-                  border: 'none', cursor: 'pointer', fontFamily: "'Ko Sans', sans-serif",
-                  opacity: 0.8, padding: '2px 6px',
-                }}
-              >
-                {isRtl ? 'عرض الكل ←' : 'View all →'}
-              </button> */}
-            </div>
-
-            {loading ? (
-              <div style={{ display: 'flex', gap: 8, height: 90 }}>
-                {[1,2,3,4].map(i => (
-                  <div key={i} style={{
-                    flex: 1, borderRadius: 8, background: 'rgba(255,255,255,0.04)',
-                    animation: 'pulse 1.4s ease infinite',
-                  }} />
-                ))}
-                <style>{`@keyframes pulse { 0%,100%{opacity:.4} 50%{opacity:.7} }`}</style>
-              </div>
-            ) : (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
-                {reels.length > 0
-                  ? reels.map(r => (
-                      <ReelCard
-                        key={r._id} reel={r} color={color}
-                        language={language} navigate={navigate} onClose={() => setOpen(false)}
-                      />
-                    ))
-                  : [1,2,3,4].map(i => (
-                      <div key={i} style={{
-                        aspectRatio: '16/9', borderRadius: 8,
-                        background: 'rgba(255,255,255,0.04)',
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      }}>
-                        <i className="fa-solid fa-film" style={{ color: '#333', fontSize: 16 }} />
-                      </div>
-                    ))
-                }
-              </div>
-            )}
-          </div>
-
-          {/* ── Divider ── */}
-          <div style={{ height: 1, background: 'rgba(255,255,255,0.06)', margin: '0 14px' }} />
-
-          {/* ── Articles Section ── */}
-          <div style={{ padding: '10px 4px 6px' }}>
-            <div style={{
-              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-              margin: '0 12px 6px', direction: isRtl ? 'rtl' : 'ltr',
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
-                <div style={{ width: 3, height: 14, borderRadius: 2, background: 'rgba(255,255,255,0.2)' }} />
-                <span style={{
-                  fontSize: 12, fontWeight: 600, color: '#bbb',
-                  fontFamily: "'Ko Sans', sans-serif",
-                }}>{isRtl ? 'أحدث المقالات' : 'Latest Articles'}</span>
-              </div>
-              <button
-                onClick={goToAll}
-                style={{
-                  fontSize: 11, color: '#666', background: 'transparent',
-                  border: 'none', cursor: 'pointer', fontFamily: "'Ko Sans', sans-serif",
-                  padding: '2px 6px',
-                }}
-              >
-                {isRtl ? 'عرض الكل ←' : 'View all →'}
-              </button>
-            </div>
-
-            {loading ? (
-              <div style={{ padding: '0 12px', display: 'flex', flexDirection: 'column', gap: 6 }}>
-                {[1,2,3].map(i => (
-                  <div key={i} style={{
-                    height: 44, borderRadius: 8, background: 'rgba(255,255,255,0.04)',
-                    animation: 'pulse 1.4s ease infinite',
-                  }} />
-                ))}
-              </div>
-            ) : articles.length > 0 ? (
-              articles.map((a, i) => (
-                <ArticleRow
-                  key={a._id} article={a} color={color}
-                  language={language} navigate={navigate}
-                  onClose={() => setOpen(false)}
-                  isLast={i === articles.length - 1}
-                />
-              ))
-            ) : (
-              <p style={{
-                textAlign: 'center', color: '#444', fontSize: 12,
-                padding: '12px 0', fontFamily: "'Ko Sans', sans-serif",
-              }}>
-                {isRtl ? 'لا توجد مقالات' : 'No articles yet'}
-              </p>
-            )}
-          </div>
-
-          {/* ── Bottom strip ── */}
+          {/* Header strip */}
           <div style={{
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            padding: '8px 14px 12px',
+            padding: '12px 16px 10px',
+            borderBottom: `1px solid ${accentBorder}`,
+            background: accentBg,
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
           }}>
+            <span style={{ color: accentColor, fontSize: '0.75rem', fontWeight: 700 }}>
+              {labelAr}
+            </span>
             <button
-              onClick={goToAll}
+              onClick={() => { navigate(`/${category}`); setOpen(false); }}
               style={{
-                width: '100%', padding: '8px', borderRadius: 8,
-                background: cfg.sectionBg,
-                border: `1px solid ${color}30`,
-                color: color, fontSize: 12, cursor: 'pointer',
-                fontFamily: "'Ko Sans', sans-serif", fontWeight: 600,
-                transition: 'background 0.15s',
+                fontSize: '0.65rem', color: accentColor,
+                background: 'none', border: 'none', cursor: 'pointer',
+                fontFamily: 'Lyon, serif', opacity: 0.8,
+                display: 'flex', alignItems: 'center', gap: '4px',
               }}
-              onMouseEnter={e => e.currentTarget.style.background = `${color}18`}
-              onMouseLeave={e => e.currentTarget.style.background = cfg.sectionBg}
             >
-              {isRtl
-                ? `استعرض كل محتوى ${category === 'tech' ? 'تكنولوجيا' : category === 'horizons' ? 'آفاق' : 'اجتماعي'} →`
-                : `Browse all ${category} content →`
-              }
+              عرض الكل
+              <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
+                <path d="M6 1.5L1 6.5M6 1.5H2M6 1.5V5.5"
+                  stroke={accentColor} strokeWidth="1.2"
+                  strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
             </button>
           </div>
+
+          {/* Loading */}
+          {loading && (
+            <div style={{ padding: '32px', display: 'flex', justifyContent: 'center' }}>
+              <div style={{
+                width: '20px', height: '20px', borderRadius: '50%',
+                border: `2px solid ${accentBg}`,
+                borderTopColor: accentColor,
+                animation: 'spin 0.7s linear infinite',
+              }} />
+            </div>
+          )}
+
+          {!loading && (
+            <div style={{ padding: '14px 16px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+
+              {/* ── Reels Section ── */}
+              {hasReels && (
+                <div>
+                  <div style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    marginBottom: '10px',
+                  }}>
+                    <span style={{
+                      fontSize: '0.65rem', color: 'rgba(137,137,137,0.6)',
+                      letterSpacing: '0.08em', textTransform: 'uppercase',
+                    }}>
+                      ريلزدي
+                    </span>
+                    <button
+                      onClick={() => { navigate(`/${category}?tab=reels`); setOpen(false); }}
+                      style={{
+                        fontSize: '0.62rem', color: '#555',
+                        background: 'none', border: 'none', cursor: 'pointer',
+                        fontFamily: 'Lyon, serif',
+                      }}
+                    >
+                      المزيد ←
+                    </button>
+                  </div>
+                  <div style={{
+                    display: 'flex', gap: '8px',
+                    overflowX: 'auto', paddingBottom: '4px',
+                    scrollbarWidth: 'none', msOverflowStyle: 'none',
+                  }}>
+                    {reels.map(reel => (
+                      <ReelCard
+                        key={reel._id}
+                        reel={reel}
+                        accentColor={accentColor}
+                        navigate={navigate}
+                        language={language}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Divider */}
+              {hasReels && hasArticles && (
+                <div style={{ height: '1px', background: 'rgba(255,255,255,0.05)' }} />
+              )}
+
+              {/* ── Articles Section ── */}
+              {hasArticles && (
+                <div>
+                  <div style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    marginBottom: '6px',
+                  }}>
+                    <span style={{
+                      fontSize: '0.65rem', color: 'rgba(137,137,137,0.6)',
+                      letterSpacing: '0.08em', textTransform: 'uppercase',
+                    }}>
+                      مقالات
+                    </span>
+                    <button
+                      onClick={() => { navigate(`/${category}`); setOpen(false); }}
+                      style={{
+                        fontSize: '0.62rem', color: '#555',
+                        background: 'none', border: 'none', cursor: 'pointer',
+                        fontFamily: 'Lyon, serif',
+                      }}
+                    >
+                      المزيد ←
+                    </button>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                    {articles.map(article => (
+                      <ArticleRow
+                        key={article._id}
+                        article={article}
+                        accentColor={accentColor}
+                        navigate={navigate}
+                        language={language}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Empty state */}
+              {!hasReels && !hasArticles && (
+                <div style={{ padding: '20px', textAlign: 'center', color: '#444', fontSize: '0.8rem' }}>
+                  لا يوجد محتوى بعد
+                </div>
+              )}
+
+            </div>
+          )}
+
+          {/* Bottom arrow pointer */}
+          <div style={{
+            position: 'absolute',
+            top: '-6px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: '12px', height: '12px',
+            background: '#181818',
+            border: '1px solid rgba(255,255,255,0.08)',
+            borderRadius: '2px 0 0 0',
+            rotate: '45deg',
+            clipPath: 'polygon(0 0, 100% 0, 0 100%)',
+          }} />
         </div>
       )}
     </div>

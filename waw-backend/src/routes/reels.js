@@ -1,79 +1,92 @@
-import express from "express";
-import Reel from "../models/Reel.js";
-import { protect, adminOnly } from "../middleware/auth.js";
-import { upload } from "../middleware/upload.js";
+import express from 'express';
+import Reel from '../models/Reel.js';
+import { protect, adminOnly } from '../middleware/auth.js';
+import { upload } from '../middleware/upload.js';
 
 const router = express.Router();
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 
 const pickLang = (obj, lang) => {
-  if (!obj) return "";
-  if (lang === "en") return obj.en?.trim() || obj.ar || "";
-  return obj.ar || "";
+  if (!obj) return '';
+  if (lang === 'en') return obj.en?.trim() || obj.ar || '';
+  return obj.ar || '';
 };
 
 const formatReel = (reel, lang) => ({
-  _id: reel._id,
-  title: pickLang(reel.title, lang) || "Untitled",
+  _id:         reel._id,
+  title:       pickLang(reel.title, lang) || 'Untitled',
   description: pickLang(reel.description, lang),
-  thumbnail: reel.thumbnail || null,
-  youtubeUrl: reel.youtubeUrl || null,
-  views: reel.views || 0,
+  thumbnail:   reel.thumbnail   || null,
+  youtubeUrl:  reel.youtubeUrl  || null,
+  views:       reel.views       || 0,
   publishedAt: reel.publishedAt || null,
+  category:    reel.category    || 'technology',
 });
 
-// ─── Admin Routes ─────────────────────────────────────────────────────────────
-// ⚠️ يجب أن تيجي Admin routes قبل /:id عشان Express ميعاملش "admin" كـ id
+// ─── Admin Routes ──────────────────────────────────────────────────────────────
+// ⚠️ Admin routes لازم تيجي قبل /:id عشان Express ميعاملش "admin" كـ id
 
-// GET /reels/admin/all
-router.get("/admin/all", protect, adminOnly, async (req, res) => {
+// GET /reels/admin/all?page=1&category=technology
+router.get('/admin/all', protect, adminOnly, async (req, res) => {
   try {
-    const { page = 1, limit = 20 } = req.query;
+    const { page = 1, limit = 20, category } = req.query;
     const skip = (Number(page) - 1) * Number(limit);
 
+    const filter = {};
+    if (category) filter.category = category;
+
     const [reels, total] = await Promise.all([
-      Reel.find().sort({ createdAt: -1 }).skip(skip).limit(Number(limit)),
-      Reel.countDocuments(),
+      Reel.find(filter).sort({ createdAt: -1 }).skip(skip).limit(Number(limit)),
+      Reel.countDocuments(filter),
     ]);
 
-    res.json({ reels, total, page: Number(page), pages: Math.ceil(total / Number(limit)) });
+    res.json({
+      reels,
+      total,
+      page:  Number(page),
+      pages: Math.ceil(total / Number(limit)),
+    });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 });
 
 // GET /reels/admin/single/:id
-router.get("/admin/single/:id", protect, adminOnly, async (req, res) => {
+router.get('/admin/single/:id', protect, adminOnly, async (req, res) => {
   try {
     const reel = await Reel.findById(req.params.id);
-    if (!reel) return res.status(404).json({ message: "Reel not found" });
+    if (!reel) return res.status(404).json({ message: 'Reel not found' });
     res.json(reel);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 });
 
-// ─── Public Routes ────────────────────────────────────────────────────────────
+// ─── Public Routes ─────────────────────────────────────────────────────────────
 
-// GET /reels?lang=ar&page=1&limit=12
-router.get("/", async (req, res) => {
+// GET /reels?lang=ar&page=1&limit=12&category=technology
+router.get('/', async (req, res) => {
   try {
-    const { lang = "ar", page = 1, limit = 12 } = req.query;
+    const { lang = 'ar', page = 1, limit = 12, category } = req.query;
     const skip = (Number(page) - 1) * Number(limit);
 
+    // فلتر ديناميكي — لو category مش موجود يجيب كل الريلز
+    const filter = { isPublished: true };
+    if (category) filter.category = category;
+
     const [reels, total] = await Promise.all([
-      Reel.find({ isPublished: true })
+      Reel.find(filter)
         .sort({ publishedAt: -1 })
         .skip(skip)
         .limit(Number(limit)),
-      Reel.countDocuments({ isPublished: true }),
+      Reel.countDocuments(filter),
     ]);
 
     res.json({
       reels: reels.map((r) => formatReel(r, lang)),
       total,
-      page: Number(page),
+      page:  Number(page),
       pages: Math.ceil(total / Number(limit)),
     });
   } catch (err) {
@@ -82,9 +95,9 @@ router.get("/", async (req, res) => {
 });
 
 // GET /reels/:id?lang=ar
-router.get("/:id", async (req, res) => {
+router.get('/:id', async (req, res) => {
   try {
-    const { lang = "ar" } = req.query;
+    const { lang = 'ar' } = req.query;
 
     const reel = await Reel.findOneAndUpdate(
       { _id: req.params.id, isPublished: true },
@@ -92,7 +105,7 @@ router.get("/:id", async (req, res) => {
       { new: true }
     );
 
-    if (!reel) return res.status(404).json({ message: "Reel not found" });
+    if (!reel) return res.status(404).json({ message: 'Reel not found' });
 
     res.json(formatReel(reel, lang));
   } catch (err) {
@@ -101,56 +114,72 @@ router.get("/:id", async (req, res) => {
 });
 
 // POST /reels
-router.post("/", protect, adminOnly, upload.fields([{ name: "thumbnail", maxCount: 1 }]), async (req, res) => {
-  try {
-    const { titleAr, titleEn, descAr, descEn, youtubeUrl } = req.body;
+router.post(
+  '/',
+  protect,
+  adminOnly,
+  upload.fields([{ name: 'thumbnail', maxCount: 1 }]),
+  async (req, res) => {
+    try {
+      const { titleAr, titleEn, descAr, descEn, youtubeUrl, category } = req.body;
 
-    const reel = await Reel.create({
-      title: { ar: titleAr, en: titleEn || "" },
-      description: { ar: descAr || "", en: descEn || "" },
-      thumbnail: req.files?.thumbnail?.[0]?.path || null,
-      youtubeUrl,
-      isPublished: false,
-      publishedAt: null,
-    });
+      const reel = await Reel.create({
+        title:       { ar: titleAr, en: titleEn || '' },
+        description: { ar: descAr || '', en: descEn || '' },
+        category:    category || 'technology',
+        thumbnail:   req.files?.thumbnail?.[0]?.path || null,
+        youtubeUrl,
+        isPublished: false,
+        publishedAt: null,
+      });
 
-    res.status(201).json(reel);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+      res.status(201).json(reel);
+    } catch (err) {
+      res.status(500).json({ message: err.message });
+    }
   }
-});
+);
 
 // PUT /reels/:id
-router.put("/:id", protect, adminOnly, upload.fields([{ name: "thumbnail", maxCount: 1 }]), async (req, res) => {
-  try {
-    const { titleAr, titleEn, descAr, descEn, youtubeUrl, isPublished } = req.body;
-    const isPublishedBool = isPublished === "true";
+router.put(
+  '/:id',
+  protect,
+  adminOnly,
+  upload.fields([{ name: 'thumbnail', maxCount: 1 }]),
+  async (req, res) => {
+    try {
+      const { titleAr, titleEn, descAr, descEn, youtubeUrl, isPublished, category } = req.body;
+      const isPublishedBool = isPublished === 'true';
 
-    const existing = await Reel.findById(req.params.id);
-    if (!existing) return res.status(404).json({ message: "Reel not found" });
+      const existing = await Reel.findById(req.params.id);
+      if (!existing) return res.status(404).json({ message: 'Reel not found' });
 
-    const update = {
-      title: { ar: titleAr, en: titleEn || "" },
-      description: { ar: descAr || "", en: descEn || "" },
-      youtubeUrl,
-      isPublished: isPublishedBool,
-      publishedAt: isPublishedBool ? existing.publishedAt || new Date() : existing.publishedAt,
-    };
+      const update = {
+        title:       { ar: titleAr, en: titleEn || '' },
+        description: { ar: descAr || '', en: descEn || '' },
+        category:    category || 'technology',
+        youtubeUrl,
+        isPublished: isPublishedBool,
+        publishedAt: isPublishedBool
+          ? existing.publishedAt || new Date()
+          : existing.publishedAt,
+      };
 
-    if (req.files?.thumbnail?.[0]) update.thumbnail = req.files.thumbnail[0].path;
+      if (req.files?.thumbnail?.[0]) update.thumbnail = req.files.thumbnail[0].path;
 
-    const reel = await Reel.findByIdAndUpdate(req.params.id, update, { new: true });
-    res.json(reel);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+      const reel = await Reel.findByIdAndUpdate(req.params.id, update, { new: true });
+      res.json(reel);
+    } catch (err) {
+      res.status(500).json({ message: err.message });
+    }
   }
-});
+);
 
 // DELETE /reels/:id
-router.delete("/:id", protect, adminOnly, async (req, res) => {
+router.delete('/:id', protect, adminOnly, async (req, res) => {
   try {
     await Reel.findByIdAndDelete(req.params.id);
-    res.json({ message: "Deleted successfully" });
+    res.json({ message: 'Deleted successfully' });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

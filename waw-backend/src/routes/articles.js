@@ -9,10 +9,18 @@ const router = express.Router();
 
 router.get("/", async (req, res) => {
   try {
-    const { category, tag, lang = "ar", page = 1, limit = 9 } = req.query;
+    const { category, tag, lang = "ar", page = 1, limit = 9, excludeCategory } = req.query;
     const filter = { isPublished: true };
-    if (category) filter.category = category;
+
+    if (category) {
+      filter.category = category;
+    } else if (excludeCategory) {
+      filter.category = { $ne: excludeCategory };
+    }
+
     if (tag) filter[`tags.${lang}`] = tag;
+
+    filter.$nor = [{ category: 'horizons', type: 'video' }];
 
     const skip  = (page - 1) * limit;
     const total = await Article.countDocuments(filter);
@@ -53,7 +61,13 @@ router.get("/", async (req, res) => {
 router.get("/most-read", async (req, res) => {
   try {
     const { lang = "ar" } = req.query;
-    const articles = await Article.find({ isPublished: true })
+    const articles = await Article.find({
+      isPublished: true,
+      // ✅ استثني documentary
+      category: { $ne: "documentary" },
+      // ✅ استثني horizons video
+      $nor: [{ category: "horizons", type: "video" }],
+    })
       .sort({ views: -1 })
       .limit(4)
       .select(`title.${lang} thumbnail category views youtubeUrl type`);
@@ -79,13 +93,55 @@ router.get("/tags", async (req, res) => {
     const { lang = "ar" } = req.query;
     const field  = `tags.${lang}`;
     const result = await Article.aggregate([
-      { $match: { isPublished: true } },
+      { $match: {
+          isPublished: true,
+          category: { $ne: "documentary" },
+          $nor: [{ category: 'horizons', type: 'video' }],
+      }},
       { $unwind: `$${field}` },
       { $group: { _id: `$${field}`, count: { $sum: 1 } } },
       { $sort:  { count: -1 } },
       { $project: { tag: "$_id", count: 1, _id: 0 } },
     ]);
     res.json(result);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+router.get("/horizons-videos", async (req, res) => {
+  try {
+    const { lang = "ar", page = 1, limit = 8 } = req.query;
+    const filter = {
+      isPublished: true,
+      category: 'horizons',
+      type: 'video',
+    };
+
+    const skip  = (page - 1) * limit;
+    const total = await Article.countDocuments(filter);
+    const articles = await Article.find(filter)
+      .sort({ publishedAt: -1 })
+      .skip(skip)
+      .limit(Number(limit))
+      .select(`title.${lang} excerpt.${lang} showName thumbnail type category tags views publishedAt author youtubeUrl episodeCount documentaryType`);
+
+    const normalized = articles.map((a) => ({
+      _id:          a._id,
+      title:        a.title[lang] || a.title.ar,
+      excerpt:      a.excerpt?.[lang] || a.excerpt?.ar || "",
+      showName:     a.showName || "",
+      thumbnail:    a.thumbnail,
+      youtubeUrl:   a.youtubeUrl || null,
+      type:         a.type,
+      category:     a.category,
+      tags:         a.tags?.[lang] || a.tags?.ar || [],
+      views:        a.views,
+      publishedAt:  a.publishedAt,
+      author:       a.author,
+    }));
+
+    res.json({ articles: normalized, total, page: Number(page), pages: Math.ceil(total / limit) });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -98,6 +154,10 @@ router.get("/search", async (req, res) => {
 
     const articles = await Article.find({
       isPublished: true,
+      // ✅ استثني documentary كلياً
+      category: { $ne: "documentary" },
+      // ✅ استثني horizons اللي نوعه video
+      $nor: [{ category: "horizons", type: "video" }],
       $or: [
         { [`title.${lang}`]: { $regex: q, $options: "i" } },
         { "title.ar":        { $regex: q, $options: "i" } },
@@ -120,7 +180,7 @@ router.get("/search", async (req, res) => {
   }
 });
 
-// ─── Admin Routes — قبل /:id ─────────────────────────────
+// ─── Admin Routes ─────────────────────────────────────────
 
 router.get("/admin/all", protect, adminOnly, async (req, res) => {
   try {

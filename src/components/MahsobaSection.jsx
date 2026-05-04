@@ -3,8 +3,6 @@ import { api } from '../services/api';
 import { useLanguage } from '../context/LanguageContext';
 import { getYoutubeEmbedUrl } from '../utils/youtube';
 
-// ── helpers ───────────────────────────────────────────────────────────────────
-
 const getYouTubeThumbnail = (url) => {
   if (!url) return null;
   const match = url.match(
@@ -18,47 +16,25 @@ const getThumb = (article) =>
   getYouTubeThumbnail(article?.youtubeUrl) ||
   '/placeholder.jpg';
 
-// ── Badge config ──────────────────────────────────────────────────────────────
-
-const BADGE_STYLES = {
-  documentary: {
-    label:  { ar: 'وثائقي', en: 'Doc' },
-    bg:     '#CCF47F20',
-    color:  '#CCF47F',
-    border: '1px solid #CCF47F40',
-  },
-  feature: {
-    label:  { ar: 'فيتشر', en: 'Feature' },
-    bg:     '#CCF47F20',
-    color:  '#CCF47F',
-    border: '1px solid #CCF47F40',
-  },
+const BADGE = {
+  bg:     '#CCF47F20',
+  color:  '#CCF47F',
+  border: '1px solid #CCF47F40',
 };
 
-// ── SectionHeader ─────────────────────────────────────────────────────────────
-
-const SectionHeader = ({ lang, activeType }) => {
-  const badge = BADGE_STYLES[activeType] || BADGE_STYLES.documentary;
-
-  return (
-    <div className="flex flex-col items-start mb-4" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
-      <div className="flex items-center gap-2">
-        <h2
-          className="font-extrabold text-xl sm:text-2xl"
-          style={{ fontFamily: 'Lyon, serif', color: '#FCF2ED' }}
-        >
-          {lang === 'ar' ? 'أفلام تسجيلية' : 'Documentaries'}
-        </h2>
-      </div>
-      <div
-        className="h-1 w-16 rounded mt-1 transition-all duration-300"
-        style={{ background: badge.color }}
-      />
+const SectionHeader = ({ lang }) => (
+  <div className="flex flex-col items-start mb-4" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
+    <div className="flex items-center gap-2">
+      <h2
+        className="font-extrabold text-xl sm:text-2xl"
+        style={{ fontFamily: 'Lyon, serif', color: '#FCF2ED' }}
+      >
+        {lang === 'ar' ? 'محسوبة' : 'Mahsouba'}
+      </h2>
     </div>
-  );
-};
-
-// ── HeroPanel ─────────────────────────────────────────────────────────────────
+    <div className="h-1 w-16 rounded mt-1" style={{ background: BADGE.color }} />
+  </div>
+);
 
 const HeroPanel = ({ article, lang }) => {
   const [showVideo, setShowVideo] = useState(false);
@@ -74,12 +50,10 @@ const HeroPanel = ({ article, lang }) => {
   const embedUrl = getYoutubeEmbedUrl(article.youtubeUrl);
   const hasVideo = !!embedUrl;
   const thumb    = getThumb(article);
-  const badge    = BADGE_STYLES[article.documentaryType] || BADGE_STYLES.documentary;
 
   return (
     <div className="w-full h-full" style={{ position: 'relative', overflow: 'hidden' }}>
 
-      {/* Inline video player */}
       {showVideo && embedUrl && (
         <div className="absolute inset-0 z-20" style={{ background: '#000' }}>
           <iframe
@@ -106,7 +80,6 @@ const HeroPanel = ({ article, lang }) => {
         </div>
       )}
 
-      {/* Thumbnail + overlays */}
       <div className="absolute inset-0 group">
         <img
           src={thumb}
@@ -126,20 +99,6 @@ const HeroPanel = ({ article, lang }) => {
           style={{ height: '55%', background: 'linear-gradient(to top, rgba(18,18,18,0.97) 0%, transparent 100%)' }}
         />
 
-        {/* Badge */}
-        <div
-          className="absolute top-3 z-10"
-          style={{ [lang === 'ar' ? 'right' : 'left']: 12 }}
-        >
-          <span
-            className="text-xs font-bold px-2 py-1 rounded-sm backdrop-blur-sm"
-            style={{ background: badge.bg, color: badge.color, border: badge.border }}
-          >
-            {badge.label[lang] || badge.label.ar}
-          </span>
-        </div>
-
-        {/* Play button */}
         {hasVideo && !showVideo && (
           <button
             onClick={() => setShowVideo(true)}
@@ -151,25 +110,24 @@ const HeroPanel = ({ article, lang }) => {
               style={{
                 width: 'clamp(44px, 8vw, 64px)', height: 'clamp(44px, 8vw, 64px)',
                 background: 'rgba(0,0,0,0.6)',
-                border: `2px solid ${badge.color}`,
-                boxShadow: `0 0 24px ${badge.color}40`,
+                border: `2px solid ${BADGE.color}`,
+                boxShadow: `0 0 24px ${BADGE.color}40`,
               }}
             >
               <svg viewBox="0 0 24 24" fill="none" style={{ width: 'clamp(18px, 3.5vw, 28px)', height: 'clamp(18px, 3.5vw, 28px)' }}>
-                <polygon points="8,5 19,12 8,19" fill={badge.color} />
+                <polygon points="8,5 19,12 8,19" fill={BADGE.color} />
               </svg>
             </div>
           </button>
         )}
 
-        {/* Text info */}
         <div
           className="absolute bottom-0 flex flex-col z-10"
           dir={lang === 'ar' ? 'rtl' : 'ltr'}
           style={{ left: 0, right: 0, padding: 'clamp(12px, 3vw, 20px)', gap: 'clamp(4px, 1vw, 8px)' }}
         >
           {article.showName && (
-            <span style={{ color: badge.color, fontFamily: 'Ko Sans, Inter, sans-serif', fontSize: 'clamp(9px, 1.5vw, 12px)', fontWeight: 700 }}>
+            <span style={{ color: BADGE.color, fontFamily: 'Ko Sans, Inter, sans-serif', fontSize: 'clamp(9px, 1.5vw, 12px)', fontWeight: 700 }}>
               {article.showName}
             </span>
           )}
@@ -190,153 +148,84 @@ const HeroPanel = ({ article, lang }) => {
   );
 };
 
-// ── SidebarItem ───────────────────────────────────────────────────────────────
-
 const SidebarItem = ({ article, lang, isActive, onClick, progress }) => {
   const thumb = getThumb(article);
-  const badge = BADGE_STYLES[article.documentaryType] || BADGE_STYLES.documentary;
 
   return (
     <button
       onClick={onClick}
-      className="relative flex items-center w-full transition-colors duration-200"
+      className="relative flex items-center justify-between w-full h-full transition-colors duration-200"
       style={{
         gap:          'clamp(8px, 1.5vw, 12px)',
         padding:      'clamp(8px, 1.5vw, 12px)',
         borderBottom: '1px solid rgba(255,255,255,0.05)',
         background:   isActive ? 'rgba(255,255,255,0.06)' : 'transparent',
-        borderRight:  lang !== 'ar' ? (isActive ? `3px solid ${badge.color}` : '3px solid transparent') : 'none',
-        borderLeft:   lang === 'ar' ? (isActive ? `3px solid ${badge.color}` : '3px solid transparent') : 'none',
+        borderRight:  lang !== 'ar' ? (isActive ? `3px solid ${BADGE.color}` : '3px solid transparent') : 'none',
+        borderLeft:   lang === 'ar' ? (isActive ? `3px solid ${BADGE.color}` : '3px solid transparent') : 'none',
         cursor:       'pointer',
         textAlign:    lang === 'ar' ? 'right' : 'left',
       }}
       dir={lang === 'ar' ? 'rtl' : 'ltr'}
     >
-      {/* Thumb */}
       <div
         className="relative flex-shrink-0"
-        style={{
-          width:        'clamp(52px, 8vw, 72px)',
-          height:       'clamp(36px, 5.5vw, 48px)',
-          borderRadius: 4,
-          overflow:     'hidden',
-        }}
+        style={{ width: 'clamp(52px, 8vw, 72px)', height: 'clamp(36px, 5.5vw, 48px)', borderRadius: 4, overflow: 'hidden' }}
       >
         <img src={thumb} alt={article.title} className="w-full h-full object-cover" />
       </div>
 
-      {/* Text */}
       <div className="flex flex-col flex-1 min-w-0" style={{ gap: 'clamp(2px, 0.5vw, 4px)' }}>
         {article.showName && (
-          <span
-            className="font-bold truncate"
-            style={{
-              color:      badge.color,
-              fontFamily: 'Ko Sans, Inter, sans-serif',
-              fontSize:   'clamp(9px, 1.2vw, 11px)',
-            }}
-          >
+          <span className="font-bold truncate" style={{ color: BADGE.color, fontFamily: 'Ko Sans, Inter, sans-serif', fontSize: 'clamp(9px, 1.2vw, 11px)' }}>
             {article.showName}
           </span>
         )}
         <span
           className="font-bold leading-snug line-clamp-2"
-          style={{
-            color:      isActive ? '#FCF2ED' : '#898989',
-            fontFamily: 'Lyon, serif',
-            fontSize:   'clamp(10px, 1.4vw, 12px)',
-          }}
+          style={{ color: isActive ? '#FCF2ED' : '#898989', fontFamily: 'Lyon, serif', fontSize: 'clamp(10px, 1.4vw, 12px)' }}
         >
           {article.title}
         </span>
-        {article.episodeCount && (
-          <span
-            style={{
-              color:      badge.color,
-              fontFamily: 'Ko Sans, Inter, sans-serif',
-              fontSize:   'clamp(9px, 1.2vw, 11px)',
-            }}
-          >
-            {article.episodeCount} {lang === 'ar' ? 'حلقة' : 'eps'}
-          </span>
-        )}
       </div>
 
-      {/* Progress bar */}
       {isActive && (
         <div
           className="absolute bottom-0 left-0 h-0.5"
-          style={{
-            width:      `${progress}%`,
-            background: `linear-gradient(90deg, ${badge.color} 0%, #4469F2 100%)`,
-            transition: 'width 0.05s linear',
-          }}
+          style={{ width: `${progress}%`, background: `linear-gradient(90deg, ${BADGE.color} 0%, #4469F2 100%)`, transition: 'width 0.05s linear' }}
         />
       )}
     </button>
   );
 };
 
-// ── MobileList ────────────────────────────────────────────────────────────────
-
 const MobileList = ({ articles, lang, selected, onSelect, progress }) => (
-  <div
-    className="flex gap-3 overflow-x-auto pb-2 no-scrollbar"
-    dir={lang === 'ar' ? 'rtl' : 'ltr'}
-  >
+  <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
     {articles.map((article, i) => {
       const thumb    = getThumb(article);
       const isActive = i === selected;
-      const badge    = BADGE_STYLES[article.documentaryType] || BADGE_STYLES.documentary;
-
       return (
         <button
           key={article._id}
           onClick={() => onSelect(i)}
           className="relative flex-shrink-0 overflow-hidden rounded-lg"
-          style={{
-            width:      120,
-            height:     80,
-            border:     isActive ? `2px solid ${badge.color}` : '2px solid transparent',
-            background: 'transparent',
-            cursor:     'pointer',
-            padding:    0,
-          }}
+          style={{ width: 120, height: 80, border: isActive ? `2px solid ${BADGE.color}` : '2px solid transparent', background: 'transparent', cursor: 'pointer', padding: 0 }}
         >
           <img src={thumb} alt={article.title} className="w-full h-full object-cover" />
-          <div
-            className="absolute inset-0"
-            style={{ background: isActive ? 'rgba(0,0,0,0.2)' : 'rgba(0,0,0,0.5)' }}
-          />
+          <div className="absolute inset-0" style={{ background: isActive ? 'rgba(0,0,0,0.2)' : 'rgba(0,0,0,0.5)' }} />
           <span
             className="absolute bottom-0 left-0 right-0 font-bold line-clamp-2 leading-tight"
-            style={{
-              color:      '#FCF2ED',
-              fontFamily: 'Lyon, serif',
-              fontSize:   10,
-              padding:    '4px 6px',
-              background: 'linear-gradient(to top, rgba(0,0,0,0.85), transparent)',
-            }}
+            style={{ color: '#FCF2ED', fontFamily: 'Lyon, serif', fontSize: 10, padding: '4px 6px', background: 'linear-gradient(to top, rgba(0,0,0,0.85), transparent)' }}
           >
             {article.title}
           </span>
           {isActive && (
-            <div
-              className="absolute bottom-0 left-0 h-0.5"
-              style={{
-                width:      `${progress}%`,
-                background: `linear-gradient(90deg, ${badge.color} 0%, #4469F2 100%)`,
-                transition: 'width 0.05s linear',
-              }}
-            />
+            <div className="absolute bottom-0 left-0 h-0.5" style={{ width: `${progress}%`, background: `linear-gradient(90deg, ${BADGE.color} 0%, #4469F2 100%)`, transition: 'width 0.05s linear' }} />
           )}
         </button>
       );
     })}
   </div>
 );
-
-// ── useRotator ────────────────────────────────────────────────────────────────
 
 const DURATION = 6000;
 const TICK     = 50;
@@ -349,7 +238,6 @@ function useRotator(count) {
   const countRef   = useRef(count);
   const sidebarRef = useRef(null);
   const itemsRef   = useRef([]);
-
   countRef.current = count;
 
   const scrollToItem = (index) => {
@@ -358,11 +246,8 @@ function useRotator(count) {
     if (!sidebar || !item) return;
     const { scrollTop, clientHeight } = sidebar;
     const { offsetTop, offsetHeight }  = item;
-    if (offsetTop < scrollTop) {
-      sidebar.scrollTop = offsetTop;
-    } else if (offsetTop + offsetHeight > scrollTop + clientHeight) {
-      sidebar.scrollTop = offsetTop + offsetHeight - clientHeight;
-    }
+    if (offsetTop < scrollTop) sidebar.scrollTop = offsetTop;
+    else if (offsetTop + offsetHeight > scrollTop + clientHeight) sidebar.scrollTop = offsetTop + offsetHeight - clientHeight;
   };
 
   const startTimer = () => {
@@ -391,15 +276,6 @@ function useRotator(count) {
     return () => clearInterval(timerRef.current);
   }, [count]);
 
-  // بيعمل reset كامل للـ index 0 بغض النظر عن الـ selected الحالي
-  const resetToFirst = () => {
-    clearInterval(timerRef.current);
-    if (sidebarRef.current) sidebarRef.current.scrollTop = 0;
-    setSelected(0);
-    setProgress(0);
-    startTimer();
-  };
-
   const select = (i) => {
     if (i === selected) return;
     setSelected(i);
@@ -408,10 +284,8 @@ function useRotator(count) {
     startTimer();
   };
 
-  return { selected, progress, select, resetToFirst, sidebarRef, itemsRef };
+  return { selected, progress, select, sidebarRef, itemsRef };
 }
-
-// ── useBreakpoint ─────────────────────────────────────────────────────────────
 
 function useBreakpoint() {
   const [bp, setBp] = useState(() => window.innerWidth);
@@ -423,24 +297,19 @@ function useBreakpoint() {
   return { isMobile: bp < 640, isTablet: bp >= 640 && bp < 1024 };
 }
 
-// ── Main Component ────────────────────────────────────────────────────────────
-
-const DocumentarySection = () => {
+const MahsobaSection = () => {
   const { lang } = useLanguage();
   const [articles, setArticles] = useState([]);
   const [loading,  setLoading]  = useState(true);
-  const { selected, progress, select, resetToFirst, sidebarRef, itemsRef } = useRotator(articles.length);
+  const { selected, progress, select, sidebarRef, itemsRef } = useRotator(articles.length);
   const { isMobile, isTablet } = useBreakpoint();
 
   useEffect(() => {
-    // لما اللغة تتغير: reset الـ sidebar والـ selected لـ 0 فوراً
-    resetToFirst();
-
     let cancelled = false;
     const load = async () => {
       try {
         setLoading(true);
-        const res = await api.getArticles('documentary', 1, lang, 8);
+        const res = await api.getHorizonsVideos(lang);
         if (!cancelled) setArticles(res.articles || []);
       } catch {
         if (!cancelled) setArticles([]);
@@ -454,16 +323,13 @@ const DocumentarySection = () => {
 
   const heroHeight = isMobile ? 220 : isTablet ? 300 : 360;
   const sidebarW   = isTablet ? 220 : 280;
-  const activeType = articles[selected]?.documentaryType || 'documentary';
+  const single     = articles.length === 1;
 
   if (loading) {
     return (
       <section className="w-full mb-10">
-        <SectionHeader lang={lang} activeType="documentary" />
-        <div
-          className="flex rounded-lg overflow-hidden"
-          style={{ height: heroHeight, background: '#1e1e1e' }}
-        >
+        <SectionHeader lang={lang} />
+        <div className="flex rounded-lg overflow-hidden" style={{ height: heroHeight, background: '#1e1e1e' }}>
           <div className="flex-1 animate-pulse" style={{ background: '#2a2a2a' }} />
           {!isMobile && (
             <div style={{ width: sidebarW, flexShrink: 0, borderLeft: '1px solid rgba(255,255,255,0.05)' }}>
@@ -481,34 +347,18 @@ const DocumentarySection = () => {
 
   return (
     <section className="w-full mb-10">
-      <SectionHeader lang={lang} activeType={activeType} />
+      <SectionHeader lang={lang} />
 
-      {/* ── Mobile ── */}
       {isMobile ? (
         <div className="flex flex-col gap-3" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
-          <div
-            style={{
-              position:     'relative',
-              width:        '100%',
-              height:       heroHeight,
-              overflow:     'hidden',
-              borderRadius: 8,
-              background:   '#121212',
-              flexShrink:   0,
-            }}
-          >
+          <div style={{ position: 'relative', width: '100%', height: heroHeight, overflow: 'hidden', borderRadius: 8, background: '#121212', flexShrink: 0 }}>
             <HeroPanel article={articles[selected]} lang={lang} />
           </div>
-          <MobileList
-            articles={articles}
-            lang={lang}
-            selected={selected}
-            onSelect={select}
-            progress={progress}
-          />
+          {!single && (
+            <MobileList articles={articles} lang={lang} selected={selected} onSelect={select} progress={progress} />
+          )}
         </div>
       ) : (
-        /* ── Tablet / Desktop ── */
         <div
           className="flex rounded-lg overflow-hidden"
           style={{ height: heroHeight, background: '#121212' }}
@@ -516,32 +366,37 @@ const DocumentarySection = () => {
         >
           <HeroPanel article={articles[selected]} lang={lang} />
 
-          <div
-            ref={sidebarRef}
-            style={{
-              width:           sidebarW,
-              flexShrink:      0,
-              background:      '#0e0e0e',
-              borderLeft:      lang === 'ar' ? 'none' : '1px solid rgba(255,255,255,0.06)',
-              borderRight:     lang === 'ar' ? '1px solid rgba(255,255,255,0.06)' : 'none',
-              overflowY:       'auto',
-              scrollbarWidth:  'none',
-              msOverflowStyle: 'none',
-            }}
-            className="no-scrollbar"
-          >
-            {articles.map((article, i) => (
-              <div key={article._id} ref={el => { itemsRef.current[i] = el; }}>
-                <SidebarItem
-                  article={article}
-                  lang={lang}
-                  isActive={i === selected}
-                  onClick={() => select(i)}
-                  progress={i === selected ? progress : 0}
-                />
-              </div>
-            ))}
-          </div>
+          {!single && (
+            <div
+              ref={sidebarRef}
+              style={{
+                width:        sidebarW,
+                flexShrink:   0,
+                height:       '100%',
+                display:      'flex',
+                flexDirection: 'column',
+                background:   '#0e0e0e',
+                borderLeft:   lang === 'ar' ? 'none' : '1px solid rgba(255,255,255,0.06)',
+                borderRight:  lang === 'ar' ? '1px solid rgba(255,255,255,0.06)' : 'none',
+                overflowY:    'auto',
+                scrollbarWidth: 'none',
+                msOverflowStyle: 'none',
+              }}
+              className="no-scrollbar"
+            >
+              {articles.map((article, i) => (
+                <div key={article._id} ref={el => { itemsRef.current[i] = el; }} style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+                  <SidebarItem
+                    article={article}
+                    lang={lang}
+                    isActive={i === selected}
+                    onClick={() => select(i)}
+                    progress={i === selected ? progress : 0}
+                  />
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
@@ -550,4 +405,4 @@ const DocumentarySection = () => {
   );
 };
 
-export default DocumentarySection;
+export default MahsobaSection;

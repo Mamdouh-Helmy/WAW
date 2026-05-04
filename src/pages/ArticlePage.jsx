@@ -9,7 +9,7 @@ import { getContentStyles } from '../utils/contentStyles';
 
 const CATEGORY_META = {
   tech:     { color: '#4469F2', bg: 'rgba(68,105,242,0.12)',  label: 'تقنية',    labelEn: 'Tech' },
-  horizons: { color: '#F7E328', bg: 'rgba(247,227,40,0.12)',  label: 'آفاق',     labelEn: 'Horizons' },
+  horizons: { color: '#F7E328', bg: 'rgba(247,227,40,0.12)',  label: 'ثقافي',     labelEn: 'Cultural' },
   social:   { color: '#E20E3C', bg: 'rgba(226,14,60,0.12)',   label: 'اجتماعي',  labelEn: 'Social' },
   podcast:  { color: '#CCF47F', bg: 'rgba(204,244,127,0.12)', label: 'بودكاست',  labelEn: 'Podcast' },
   home:     { color: '#FCF2ED', bg: 'rgba(252,242,237,0.07)', label: 'الرئيسية', labelEn: 'Home' },
@@ -28,6 +28,8 @@ const ArticlePage = () => {
   if (loading) return <LoadingSpinner />;
   if (error)   return <ErrorMessage />;
   if (!article) return <ErrorMessage message={dir === 'rtl' ? 'المقال غير موجود' : 'Article not found'} />;
+  if (article.category === 'documentary') return <ErrorMessage message={dir === 'rtl' ? 'المقال غير موجود' : 'Article not found'} />;
+  if (article.category === 'horizons' && article.type === "video") return <ErrorMessage message={dir === 'rtl' ? 'المقال غير موجود' : 'Article not found'} />;
 
   const cat      = CATEGORY_META[article.category] || CATEGORY_META.home;
   const catLabel = dir === 'rtl' ? cat.label : cat.labelEn;

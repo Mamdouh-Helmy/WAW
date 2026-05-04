@@ -37,7 +37,7 @@ function AppRoutes() {
     <Routes>
       <Route path="/"              element={<><Header /><SubNav /><HomePage /><Footer /><ScrollToTop /></>} />
       <Route path="/tech"          element={<><Header /><SubNav /><TechPage /><Footer /><ScrollToTop /></>} />
-      <Route path="/horizons"      element={<><Header /><SubNav /><HorizonsPage /><Footer /><ScrollToTop /></>} />
+      <Route path="/cultural"      element={<><Header /><SubNav /><HorizonsPage /><Footer /><ScrollToTop /></>} />
       <Route path="/social"        element={<><Header /><SubNav /><SocialPage /><Footer /><ScrollToTop /></>} />
       <Route path="/podcast"       element={<><Header /><SubNav /><PodcastPage /><Footer /><ScrollToTop /></>} />
       <Route path="/documentary"   element={<><Header /><SubNav /><DocumentaryPage /><Footer /><ScrollToTop /></>} />  {/* ← جديد */}

@@ -4,16 +4,16 @@ import { api } from '../../services/api';
 import { useFetch } from '../../hooks/useFetch';
 
 const CATEGORY_META = {
-  tech:     { color: '#4469F2', bg: 'rgba(68,105,242,0.12)',  label: 'تقنية' },
-  horizons: { color: '#F7E328', bg: 'rgba(247,227,40,0.12)',  label: 'آفاق' },
-  social:   { color: '#E20E3C', bg: 'rgba(226,14,60,0.12)',   label: 'اجتماعي' },
-  podcast:  { color: '#CCF47F', bg: 'rgba(204,244,127,0.12)', label: 'بودكاست' },
-  home:     { color: '#FCF2ED', bg: 'rgba(252,242,237,0.07)', label: 'الرئيسية' },
+  tech:        { color: '#4469F2', bg: 'rgba(68,105,242,0.12)',   label: 'تقنية' },
+  horizons:    { color: '#F7E328', bg: 'rgba(247,227,40,0.12)',   label: 'ثقافي' },
+  social:      { color: '#E20E3C', bg: 'rgba(226,14,60,0.12)',    label: 'اجتماعي' },
+  podcast:     { color: '#CCF47F', bg: 'rgba(204,244,127,0.12)',  label: 'بودكاست' },
+  home:        { color: '#CCF47F', bg: 'rgba(204,244,127,0.12)',  label: 'عام' },
+  documentary: { color: '#CCF47F', bg: 'rgba(204,244,127,0.12)', label: 'وثائقي' },
 };
 
 const TYPE_ICONS = { article: '◎', video: '▶', images: '◉' };
 
-// ── Confirm Delete Modal ──────────────────────────────────
 const ConfirmModal = ({ isOpen, onConfirm, onCancel, articleTitle }) => {
   if (!isOpen) return null;
   return (
@@ -129,12 +129,11 @@ const ConfirmModal = ({ isOpen, onConfirm, onCancel, articleTitle }) => {
   );
 };
 
-// ── Main Component ────────────────────────────────────────
 const AdminArticles = () => {
-  const [page,       setPage]       = useState(1);
-  const [refresh,    setRefresh]    = useState(0);
-  const [deletingId, setDeletingId] = useState(null);
-  const [togglingId, setTogglingId] = useState(null);
+  const [page,         setPage]         = useState(1);
+  const [refresh,      setRefresh]      = useState(0);
+  const [deletingId,   setDeletingId]   = useState(null);
+  const [togglingId,   setTogglingId]   = useState(null);
   const [confirmModal, setConfirmModal] = useState({ open: false, id: null, title: '' });
 
   const { data, loading } = useFetch(() => api.getAdminArticles(page), [page, refresh]);
@@ -268,54 +267,24 @@ const AdminArticles = () => {
         }
 
         @media (max-width: 480px) {
-          .admin-articles-grid {
-            grid-template-columns: 1fr;
-          }
-
-          .admin-header {
-            flex-direction: column;
-            align-items: flex-start;
-          }
-
-          .admin-header a {
-            width: 100%;
-            justify-content: center;
-          }
-
-          .admin-stat-card {
-            min-width: 80px;
-          }
-
-          .article-thumbnail {
-            height: 160px;
-          }
-
-          .article-footer {
-            flex-direction: column;
-            align-items: flex-start;
-          }
-
-          .article-actions {
-            width: 100%;
-            display: flex;
-            justify-content: flex-end;
-          }
+          .admin-articles-grid { grid-template-columns: 1fr; }
+          .admin-header { flex-direction: column; align-items: flex-start; }
+          .admin-header a { width: 100%; justify-content: center; }
+          .admin-stat-card { min-width: 80px; }
+          .article-thumbnail { height: 160px; }
+          .article-footer { flex-direction: column; align-items: flex-start; }
+          .article-actions { width: 100%; display: flex; justify-content: flex-end; }
         }
 
         @media (min-width: 481px) and (max-width: 768px) {
-          .admin-articles-grid {
-            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-          }
+          .admin-articles-grid { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
         }
 
         @media (min-width: 1200px) {
-          .admin-articles-grid {
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-          }
+          .admin-articles-grid { grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); }
         }
       `}</style>
 
-      {/* ── Confirm Modal ── */}
       <ConfirmModal
         isOpen={confirmModal.open}
         articleTitle={confirmModal.title}
@@ -326,7 +295,7 @@ const AdminArticles = () => {
       {/* ── Header ── */}
       <div className="admin-header">
         <div>
-          <p style={{ color: '#898989', fontSize: '0.75rem', marginBottom: '3px', margin: '0 0 3px' }}>إدارة المحتوى</p>
+          <p style={{ color: '#898989', fontSize: '0.75rem', margin: '0 0 3px' }}>إدارة المحتوى</p>
           <h1 style={{ color: '#FCF2ED', fontSize: 'clamp(1.2rem, 3vw, 1.5rem)', fontWeight: 700, margin: 0 }}>المقالات</h1>
         </div>
         <Link
@@ -337,8 +306,7 @@ const AdminArticles = () => {
             padding: '9px 18px', borderRadius: '10px',
             fontWeight: 700, fontSize: '0.875rem',
             textDecoration: 'none', fontFamily: 'Lyon, serif',
-            transition: 'background 0.15s',
-            whiteSpace: 'nowrap',
+            transition: 'background 0.15s', whiteSpace: 'nowrap',
           }}
           onMouseEnter={e => e.currentTarget.style.background = '#BBE570'}
           onMouseLeave={e => e.currentTarget.style.background = '#CCF47F'}
@@ -353,11 +321,11 @@ const AdminArticles = () => {
         <div className="admin-stats-row">
           {[
             { label: 'إجمالي المقالات', value: data.total || 0 },
-            { label: 'المنشور',         value: data.articles?.filter(a => a.isPublished).length || 0 },
+            { label: 'المنشور',         value: data.articles?.filter(a => a.isPublished).length  || 0 },
             { label: 'المسودات',        value: data.articles?.filter(a => !a.isPublished).length || 0 },
           ].map(stat => (
             <div key={stat.label} className="admin-stat-card">
-              <p style={{ color: '#898989', fontSize: '0.72rem', marginBottom: '3px', margin: '0 0 3px' }}>{stat.label}</p>
+              <p style={{ color: '#898989', fontSize: '0.72rem', margin: '0 0 3px' }}>{stat.label}</p>
               <p style={{ color: '#FCF2ED', fontSize: 'clamp(1rem, 3vw, 1.25rem)', fontWeight: 700, margin: 0 }}>{stat.value}</p>
             </div>
           ))}
@@ -415,12 +383,11 @@ const AdminArticles = () => {
                     position: 'absolute', top: '10px', right: '10px',
                     fontSize: '0.65rem', fontWeight: 600,
                     padding: '3px 9px', borderRadius: '999px',
-                    background: 'rgba(0,0,0,0.6)',
-                    backdropFilter: 'blur(6px)',
-                    color: '#FCF2ED',
-                    border: '1px solid rgba(255,255,255,0.1)',
+                    background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(6px)',
+                    color: '#FCF2ED', border: '1px solid rgba(255,255,255,0.1)',
                   }}>
-                    {TYPE_ICONS[article.type]} {article.type === 'video' ? 'فيديو' : article.type === 'images' ? 'صور' : 'مقال'}
+                    {TYPE_ICONS[article.type]}{' '}
+                    {article.type === 'video' ? 'فيديو' : article.type === 'images' ? 'صور' : 'مقال'}
                   </span>
 
                   {/* Category badge */}
@@ -441,10 +408,8 @@ const AdminArticles = () => {
                   <p style={{
                     color: '#FCF2ED', fontSize: '0.9rem', fontWeight: 600,
                     margin: 0, lineHeight: 1.5,
-                    display: '-webkit-box',
-                    WebkitLineClamp: 2,
-                    WebkitBoxOrient: 'vertical',
-                    overflow: 'hidden',
+                    display: '-webkit-box', WebkitLineClamp: 2,
+                    WebkitBoxOrient: 'vertical', overflow: 'hidden',
                   }}>
                     {article.title?.ar || '—'}
                   </p>
@@ -480,19 +445,20 @@ const AdminArticles = () => {
 
                   {/* Footer */}
                   <div className="article-footer">
-                    {/* Toggle publish */}
+
+                    {/* ── Toggle Publish ── */}
                     <button
                       onClick={() => handleTogglePublish(article)}
                       disabled={isToggling}
                       style={{
                         fontSize: '0.72rem', padding: '4px 12px', borderRadius: '999px',
                         border: article.isPublished
-                          ? '1px solid rgba(74,222,128,0.3)'
+                          ? '1px solid rgba(204,244,127,0.3)'   // ✅ lime
                           : '1px solid rgba(255,255,255,0.1)',
                         background: article.isPublished
-                          ? 'rgba(74,222,128,0.1)'
+                          ? 'rgba(204,244,127,0.1)'              // ✅ lime
                           : 'rgba(255,255,255,0.05)',
-                        color: article.isPublished ? '#4ade80' : '#898989',
+                        color: article.isPublished ? '#CCF47F' : '#898989', // ✅ lime
                         cursor: isToggling ? 'not-allowed' : 'pointer',
                         fontFamily: 'Lyon, serif', fontWeight: 500,
                         transition: 'all 0.15s',
@@ -501,14 +467,24 @@ const AdminArticles = () => {
                         flexShrink: 0,
                       }}
                     >
-                      {isToggling
-                        ? <span style={{ width: '10px', height: '10px', border: '1.5px solid currentColor', borderTopColor: 'transparent', borderRadius: '50%', display: 'inline-block', animation: 'spin 0.7s linear infinite' }} />
-                        : <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: article.isPublished ? '#4ade80' : '#898989', display: 'inline-block' }} />
-                      }
+                      {isToggling ? (
+                        <span style={{
+                          width: '10px', height: '10px',
+                          border: '1.5px solid currentColor', borderTopColor: 'transparent',
+                          borderRadius: '50%', display: 'inline-block',
+                          animation: 'spin 0.7s linear infinite',
+                        }} />
+                      ) : (
+                        <span style={{
+                          width: '6px', height: '6px', borderRadius: '50%',
+                          background: article.isPublished ? '#CCF47F' : '#898989', // ✅ lime
+                          display: 'inline-block',
+                        }} />
+                      )}
                       {article.isPublished ? 'منشور' : 'مسودة'}
                     </button>
 
-                    {/* Edit + Delete */}
+                    {/* ── Edit + Delete ── */}
                     <div className="article-actions" style={{ display: 'flex', gap: '8px' }}>
                       <Link
                         to={`/admin/edit/${article._id}`}
@@ -518,14 +494,15 @@ const AdminArticles = () => {
                           border: '1px solid rgba(68,105,242,0.3)',
                           background: 'rgba(68,105,242,0.1)', color: '#4469F2',
                           display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          textDecoration: 'none', fontSize: '0.75rem', transition: 'all 0.15s',
-                          flexShrink: 0,
+                          textDecoration: 'none', fontSize: '0.75rem',
+                          transition: 'all 0.15s', flexShrink: 0,
                         }}
                         onMouseEnter={e => e.currentTarget.style.background = 'rgba(68,105,242,0.25)'}
                         onMouseLeave={e => e.currentTarget.style.background = 'rgba(68,105,242,0.1)'}
                       >
                         <i className="fa-solid fa-pen-to-square" />
                       </Link>
+
                       <button
                         onClick={() => handleDelete(article)}
                         disabled={isDeleting}
@@ -536,18 +513,17 @@ const AdminArticles = () => {
                           background: 'transparent', color: '#898989',
                           display: 'flex', alignItems: 'center', justifyContent: 'center',
                           cursor: isDeleting ? 'not-allowed' : 'pointer',
-                          fontSize: '0.75rem', transition: 'all 0.15s',
-                          flexShrink: 0,
+                          fontSize: '0.75rem', transition: 'all 0.15s', flexShrink: 0,
                         }}
                         onMouseEnter={e => {
                           e.currentTarget.style.borderColor = 'rgba(226,14,60,0.35)';
-                          e.currentTarget.style.background = 'rgba(226,14,60,0.1)';
-                          e.currentTarget.style.color = '#E20E3C';
+                          e.currentTarget.style.background  = 'rgba(226,14,60,0.1)';
+                          e.currentTarget.style.color       = '#E20E3C';
                         }}
                         onMouseLeave={e => {
                           e.currentTarget.style.borderColor = 'rgba(255,255,255,0.08)';
-                          e.currentTarget.style.background = 'transparent';
-                          e.currentTarget.style.color = '#898989';
+                          e.currentTarget.style.background  = 'transparent';
+                          e.currentTarget.style.color       = '#898989';
                         }}
                       >
                         <i className="fa-solid fa-trash" />

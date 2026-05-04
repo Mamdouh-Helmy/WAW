@@ -1,4 +1,4 @@
-import HeroSlider from '../components/HeroSlider';
+import HeroVideo from '../components/HeroVideo';
 import MediaGrid from '../components/MediaGrid';
 import PodcastsSection from '../components/PodcastsSection';
 import ArticlesSection from '../components/ArticlesSection';
@@ -12,24 +12,24 @@ const PodcastPage = () => {
 
   return (
    <main className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 overflow-x-hidden">
-     <MostReadSection />
-      <HeroSlider />
-       <ReelsSection />
+     {/* <MostReadSection /> */}
+      {/* <HeroVideo /> */}
+       {/* <ReelsSection /> */}
 
        {/* ── أفلام تسجيلية ── جديد ──────────────────────────────── */}
-      <DocumentarySection />
+      {/* <DocumentarySection /> */}
     
       <PodcastsSection />
 
       {/* Category Header */}
-      <div className="flex flex-col items-start mb-6">
+      {/* <div className="flex flex-col items-start mb-6">
         <h2 className="font-extrabold text-2xl text-[#FCF2ED]" style={{ fontFamily: 'Lyon, serif' }}>
           {t.categories.podcast}
         </h2>
         <div className="h-1 w-16 bg-[#CCF47F] rounded mt-1"></div>
-      </div>
+      </div> */}
 
-      <MediaGrid categoryColor="phosphor" />
+      {/* <MediaGrid categoryColor="phosphor" /> */}
       
       <ArticlesSection />
      

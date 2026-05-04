@@ -10,8 +10,8 @@ const getYoutubeThumbnail = (url) => {
   try {
     const u = new URL(url);
     let id = null;
-    if (u.searchParams.get('v'))       id = u.searchParams.get('v');
-    else if (u.hostname === 'youtu.be') id = u.pathname.slice(1);
+    if (u.searchParams.get('v'))              id = u.searchParams.get('v');
+    else if (u.hostname === 'youtu.be')        id = u.pathname.slice(1);
     else if (u.pathname.startsWith('/shorts/')) id = u.pathname.replace('/shorts/', '');
     else if (u.pathname.startsWith('/embed/'))  id = u.pathname.replace('/embed/', '');
     return id ? `https://img.youtube.com/vi/${id}/hqdefault.jpg` : null;
@@ -26,12 +26,17 @@ const inputStyle = {
   boxSizing: 'border-box', transition: 'border-color 0.2s',
 };
 
-const subLabelStyle = {
-  color: '#898989', fontSize: '0.75rem',
-  marginBottom: '6px', fontFamily: 'Lyon, serif',
-};
+const ACCENT = '#F7E328';
 
-const ACCENT = '#F7E328'; // yellow — distinct from articles (#CCF47F)
+// القيم الثلاثة للأقسام
+const CATEGORIES = [
+  { value: 'technology', labelAr: 'تكنولوجي', color: '#4469F2', bg: 'rgba(68,105,242,0.12)', border: 'rgba(68,105,242,0.3)' },
+  { value: 'social',     labelAr: 'اجتماعي',  color: '#4ade80', bg: 'rgba(74,222,128,0.12)', border: 'rgba(74,222,128,0.3)' },
+  { value: 'cultural',   labelAr: 'ثقافي',    color: '#F7E328', bg: 'rgba(247,227,40,0.12)', border: 'rgba(247,227,40,0.3)' },
+];
+
+const getCategoryMeta = (value) =>
+  CATEGORIES.find(c => c.value === value) || CATEGORIES[0];
 
 /* ─────────────────────────────────────────────────────────────
    Confirm Delete Modal
@@ -45,8 +50,7 @@ const ConfirmModal = ({ isOpen, onConfirm, onCancel, title }) => {
         position: 'fixed', inset: 0, zIndex: 1000,
         background: 'rgba(0,0,0,0.65)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        backdropFilter: 'blur(6px)',
-        padding: '16px',
+        backdropFilter: 'blur(6px)', padding: '16px',
       }}
     >
       <div
@@ -117,11 +121,12 @@ const ConfirmModal = ({ isOpen, onConfirm, onCancel, title }) => {
 const ReelForm = ({ initial, onSave, onCancel }) => {
   const isEdit = Boolean(initial?._id);
   const [form, setForm] = useState({
-    titleAr:     initial?.title?.ar         || '',
-    titleEn:     initial?.title?.en         || '',
-    descAr:      initial?.description?.ar   || '',
-    descEn:      initial?.description?.en   || '',
-    youtubeUrl:  initial?.youtubeUrl        || '',
+    titleAr:     initial?.title?.ar       || '',
+    titleEn:     initial?.title?.en       || '',
+    descAr:      initial?.description?.ar || '',
+    descEn:      initial?.description?.en || '',
+    youtubeUrl:  initial?.youtubeUrl      || '',
+    category:    initial?.category        || 'technology',
     isPublished: initial?.isPublished === true ? 'true' : 'false',
   });
   const [thumbnail, setThumbnail]       = useState(null);
@@ -241,6 +246,39 @@ const ReelForm = ({ initial, onSave, onCancel }) => {
             />
           </div>
 
+          {/* ✅ Category Selector */}
+          <div style={{ background: '#1a1a1a', borderRadius: '14px', padding: '18px 20px', border: '1px solid rgba(255,255,255,0.06)' }}>
+            <p style={{ color: '#FCF2ED', fontWeight: 700, fontSize: '0.875rem', marginBottom: '12px' }}>القسم</p>
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+              {CATEGORIES.map(cat => {
+                const isSelected = form.category === cat.value;
+                return (
+                  <button
+                    key={cat.value}
+                    type="button"
+                    onClick={() => setForm(p => ({ ...p, category: cat.value }))}
+                    style={{
+                      flex: 1, minWidth: '80px',
+                      padding: '9px 14px', borderRadius: '10px',
+                      border: isSelected ? `1px solid ${cat.border}` : '1px solid rgba(255,255,255,0.08)',
+                      background: isSelected ? cat.bg : 'transparent',
+                      color: isSelected ? cat.color : '#898989',
+                      cursor: 'pointer', fontSize: '0.82rem',
+                      fontFamily: 'Lyon, serif', fontWeight: isSelected ? 700 : 400,
+                      transition: 'all 0.15s',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+                    }}
+                  >
+                    {isSelected && (
+                      <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: cat.color, display: 'inline-block' }} />
+                    )}
+                    {cat.labelAr}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
           {/* YouTube URL */}
           <div style={{ background: '#1a1a1a', borderRadius: '14px', padding: '18px 20px', border: '1px solid rgba(255,255,255,0.06)' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
@@ -263,7 +301,6 @@ const ReelForm = ({ initial, onSave, onCancel }) => {
               onFocus={e => e.target.style.borderColor = ACCENT}
               onBlur={e => e.target.style.borderColor = 'rgba(255,255,255,0.1)'}
             />
-            {/* Embed preview */}
             {embedUrl && (
               <div style={{ marginTop: '12px', borderRadius: '10px', overflow: 'hidden', aspectRatio: '9/16', maxHeight: '320px', background: '#111' }}>
                 <iframe
@@ -309,8 +346,7 @@ const ReelForm = ({ initial, onSave, onCancel }) => {
             )}
 
             <label style={{
-              display: 'flex', flexDirection: 'column', alignItems: 'center',
-              justifyContent: 'center',
+              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
               border: `2px dashed ${thumbPreview ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.12)'}`,
               borderRadius: '10px', padding: '20px', cursor: 'pointer', gap: '6px',
             }}>
@@ -390,21 +426,22 @@ const ReelForm = ({ initial, onSave, onCancel }) => {
    Main AdminReels component
 ───────────────────────────────────────────────────────────── */
 const AdminReels = () => {
-  const [reels,      setReels]      = useState([]);
-  const [total,      setTotal]      = useState(0);
-  const [pages,      setPages]      = useState(1);
-  const [page,       setPage]       = useState(1);
-  const [loading,    setLoading]    = useState(true);
-  const [refresh,    setRefresh]    = useState(0);
-  const [deletingId, setDeletingId] = useState(null);
-  const [togglingId, setTogglingId] = useState(null);
-  const [modal, setModal]           = useState({ open: false, id: null, title: '' });
-  const [formMode, setFormMode]     = useState(null); // null | 'new' | reelObject
+  const [reels,         setReels]         = useState([]);
+  const [total,         setTotal]         = useState(0);
+  const [pages,         setPages]         = useState(1);
+  const [page,          setPage]          = useState(1);
+  const [loading,       setLoading]       = useState(true);
+  const [refresh,       setRefresh]       = useState(0);
+  const [deletingId,    setDeletingId]    = useState(null);
+  const [togglingId,    setTogglingId]    = useState(null);
+  const [modal,         setModal]         = useState({ open: false, id: null, title: '' });
+  const [formMode,      setFormMode]      = useState(null); // null | 'new' | reelObject
+  const [filterCat,     setFilterCat]     = useState('');  // '' = الكل
 
   const fetchReels = async () => {
     setLoading(true);
     try {
-      const res = await api.getAdminReels(page);
+      const res = await api.getAdminReels(page, filterCat);
       setReels(res.reels || []);
       setTotal(res.total || 0);
       setPages(res.pages || 1);
@@ -415,7 +452,11 @@ const AdminReels = () => {
     }
   };
 
-  useEffect(() => { fetchReels(); }, [page, refresh]);
+  useEffect(() => {
+    setPage(1); // reset page when filter changes
+  }, [filterCat]);
+
+  useEffect(() => { fetchReels(); }, [page, filterCat, refresh]);
 
   const handleDelete = (reel) =>
     setModal({ open: true, id: reel._id, title: reel.title?.ar || '' });
@@ -433,11 +474,12 @@ const AdminReels = () => {
   const handleToggle = async (reel) => {
     setTogglingId(reel._id);
     const data = new FormData();
-    data.append('titleAr',     reel.title?.ar         || '');
-    data.append('titleEn',     reel.title?.en         || '');
-    data.append('descAr',      reel.description?.ar   || '');
-    data.append('descEn',      reel.description?.en   || '');
-    data.append('youtubeUrl',  reel.youtubeUrl        || '');
+    data.append('titleAr',     reel.title?.ar       || '');
+    data.append('titleEn',     reel.title?.en       || '');
+    data.append('descAr',      reel.description?.ar || '');
+    data.append('descEn',      reel.description?.en || '');
+    data.append('youtubeUrl',  reel.youtubeUrl      || '');
+    data.append('category',    reel.category        || 'technology');
     data.append('isPublished', String(!reel.isPublished));
     try {
       await api.updateReel(reel._id, data);
@@ -516,7 +558,7 @@ const AdminReels = () => {
       />
 
       {/* Header */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '28px', gap: '12px', flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px', gap: '12px', flexWrap: 'wrap' }}>
         <div>
           <p style={{ color: '#898989', fontSize: '0.75rem', margin: '0 0 3px' }}>إدارة المحتوى</p>
           <h1 style={{ color: '#FCF2ED', fontSize: 'clamp(1.2rem, 3vw, 1.5rem)', fontWeight: 700, margin: 0 }}>
@@ -541,13 +583,54 @@ const AdminReels = () => {
         </button>
       </div>
 
+      {/* ✅ Category Filter Tabs */}
+      <div style={{
+        display: 'flex', gap: '6px', marginBottom: '20px', flexWrap: 'wrap',
+      }}>
+        {[{ value: '', labelAr: 'الكل' }, ...CATEGORIES].map(cat => {
+          const isActive = filterCat === cat.value;
+          const meta = cat.value ? getCategoryMeta(cat.value) : null;
+          return (
+            <button
+              key={cat.value}
+              type="button"
+              onClick={() => setFilterCat(cat.value)}
+              style={{
+                padding: '6px 16px', borderRadius: '999px',
+                border: isActive
+                  ? `1px solid ${meta ? meta.border : 'rgba(247,227,40,0.4)'}`
+                  : '1px solid rgba(255,255,255,0.08)',
+                background: isActive
+                  ? (meta ? meta.bg : 'rgba(247,227,40,0.12)')
+                  : 'transparent',
+                color: isActive
+                  ? (meta ? meta.color : ACCENT)
+                  : '#898989',
+                cursor: 'pointer', fontSize: '0.8rem',
+                fontFamily: 'Lyon, serif', fontWeight: isActive ? 700 : 400,
+                transition: 'all 0.15s',
+                display: 'inline-flex', alignItems: 'center', gap: '5px',
+              }}
+            >
+              {isActive && (
+                <span style={{
+                  width: '5px', height: '5px', borderRadius: '50%',
+                  background: meta ? meta.color : ACCENT, display: 'inline-block',
+                }} />
+              )}
+              {cat.labelAr}
+            </button>
+          );
+        })}
+      </div>
+
       {/* Stats */}
       {!loading && (
         <div style={{ display: 'flex', gap: '10px', marginBottom: '24px', flexWrap: 'wrap' }}>
           {[
-            { label: 'إجمالي الريلزدي', value: total },
-            { label: 'المنشور',          value: reels.filter(r => r.isPublished).length },
-            { label: 'المسودات',         value: reels.filter(r => !r.isPublished).length },
+            { label: filterCat ? `ريلزدي ${getCategoryMeta(filterCat).labelAr}` : 'إجمالي الريلزدي', value: total },
+            { label: 'المنشور',  value: reels.filter(r => r.isPublished).length },
+            { label: 'المسودات', value: reels.filter(r => !r.isPublished).length },
           ].map(s => (
             <div key={s.label} style={{
               background: '#1a1a1a', border: '1px solid rgba(255,255,255,0.06)',
@@ -579,6 +662,7 @@ const AdminReels = () => {
             const thumb      = reel.thumbnail || getYoutubeThumbnail(reel.youtubeUrl);
             const isDeleting = deletingId === reel._id;
             const isToggling = togglingId === reel._id;
+            const catMeta    = getCategoryMeta(reel.category);
 
             return (
               <div key={reel._id} className="reel-card" style={{ opacity: isDeleting ? 0.4 : 1 }}>
@@ -604,6 +688,18 @@ const AdminReels = () => {
                     border: reel.isPublished ? '1px solid rgba(74,222,128,0.3)' : '1px solid rgba(255,255,255,0.1)',
                   }}>
                     {reel.isPublished ? '● منشور' : '○ مسودة'}
+                  </span>
+
+                  {/* ✅ Category badge */}
+                  <span style={{
+                    position: 'absolute', top: '8px', left: '8px',
+                    fontSize: '0.6rem', fontWeight: 600,
+                    padding: '3px 8px', borderRadius: '999px',
+                    background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(6px)',
+                    color: catMeta.color,
+                    border: `1px solid ${catMeta.border}`,
+                  }}>
+                    {catMeta.labelAr}
                   </span>
 
                   {/* Views */}
@@ -696,7 +792,11 @@ const AdminReels = () => {
       {!loading && reels.length === 0 && (
         <div style={{ padding: '60px 20px', textAlign: 'center', color: '#898989' }}>
           <div style={{ fontSize: '2rem', opacity: 0.2, marginBottom: '12px' }}>▶</div>
-          <p style={{ fontSize: '0.875rem' }}>لا توجد ريلزدي بعد</p>
+          <p style={{ fontSize: '0.875rem' }}>
+            {filterCat
+              ? `لا توجد ريلزدي في قسم ${getCategoryMeta(filterCat).labelAr} بعد`
+              : 'لا توجد ريلزدي بعد'}
+          </p>
           <button type="button" onClick={() => setFormMode('new')} style={{
             color: ACCENT, fontSize: '0.8125rem', background: 'none', border: 'none',
             cursor: 'pointer', fontFamily: 'Lyon, serif',

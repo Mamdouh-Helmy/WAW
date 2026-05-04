@@ -12,12 +12,13 @@ import ErrorMessage from './ErrorMessage';
 const ROUTE_CATEGORY = {
   '/': '',
   '/tech': 'tech',
-  '/horizons': 'horizons',
+  '/cultural': 'horizons',
   '/social': 'social',
   '/podcast': 'podcast',
 };
 
 const TAG_COLORS = {
+  home: 'bg-[#CCF47F] text-black',
   tech: 'bg-[#4469F2] text-white',
   horizons: 'bg-[#F7E328] text-black',
   social: 'bg-[#E20E3C] text-white',
@@ -29,6 +30,12 @@ const TYPE_ICONS = {
   video: 'fa-play',
   images: 'fa-image',
   article: 'fa-file-lines',
+};
+
+const BADGE = {
+  bg:     '#CCF47F20',
+  color:  '#CCF47F',
+  border: '1px solid #CCF47F40',
 };
 
 // ─────────────────────────────────────────────
@@ -130,7 +137,9 @@ const ArticlesSection = () => {
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl sm:text-2xl font-bold text-[#FCF2ED]">
           {t.articles.title}
+          <div className="h-1 w-16 rounded mt-1" style={{ background: BADGE.color }} />
         </h2>
+        
 
         <div className="flex items-center gap-3">
           {articles.length > visible && (
@@ -190,7 +199,7 @@ const ArticlesSection = () => {
                     </span> */}
 
                     <span className={`px-2 py-1 rounded font-bold ${TAG_COLORS[card.category] || TAG_COLORS.default}`}>
-                      {card.category == "documentary" ? t.categories[card.category] : t.categories[card.category]}
+                      {t.categories[card.category]}
 
                     </span>
                   </div>

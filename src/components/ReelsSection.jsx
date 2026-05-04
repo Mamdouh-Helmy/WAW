@@ -3,8 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { api } from "../services/api";
 import { useLanguage } from "../context/LanguageContext";
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
 const getYoutubeThumbnail = (url) => {
   if (!url) return null;
   try {
@@ -20,53 +18,64 @@ const getYoutubeThumbnail = (url) => {
   }
 };
 
-// ─── Responsive sizes hook ────────────────────────────────────────────────────
-
 const useReelSizes = () => {
   const [sizes, setSizes] = useState({ card: { w: 180, h: 320 }, hero: { w: 202, h: 360 } });
-
   useEffect(() => {
     const calc = () => {
       const vw = window.innerWidth;
-      // نحسب نسبة 9:16 (1080x1920) — hero يبقى ~11% من عرض الشاشة كحد أدنى
-      if (vw < 380) {
-        setSizes({ card: { w: 90, h: 160 }, hero: { w: 108, h: 192 } });
-      } else if (vw < 480) {
-        setSizes({ card: { w: 108, h: 192 }, hero: { w: 135, h: 240 } });
-      } else if (vw < 640) {
-        setSizes({ card: { w: 126, h: 224 }, hero: { w: 157, h: 280 } });
-      } else if (vw < 768) {
-        setSizes({ card: { w: 144, h: 256 }, hero: { w: 180, h: 320 } });
-      } else if (vw < 1024) {
-        setSizes({ card: { w: 162, h: 288 }, hero: { w: 202, h: 360 } });
-      } else if (vw < 1280) {
-        setSizes({ card: { w: 180, h: 320 }, hero: { w: 225, h: 400 } });
-      } else {
-        setSizes({ card: { w: 202, h: 360 }, hero: { w: 252, h: 448 } });
-      }
+      if (vw < 380)       setSizes({ card: { w: 90,  h: 160 }, hero: { w: 108, h: 192 } });
+      else if (vw < 480)  setSizes({ card: { w: 108, h: 192 }, hero: { w: 135, h: 240 } });
+      else if (vw < 640)  setSizes({ card: { w: 126, h: 224 }, hero: { w: 157, h: 280 } });
+      else if (vw < 768)  setSizes({ card: { w: 144, h: 256 }, hero: { w: 180, h: 320 } });
+      else if (vw < 1024) setSizes({ card: { w: 162, h: 288 }, hero: { w: 202, h: 360 } });
+      else if (vw < 1280) setSizes({ card: { w: 180, h: 320 }, hero: { w: 225, h: 400 } });
+      else                setSizes({ card: { w: 202, h: 360 }, hero: { w: 252, h: 448 } });
     };
     calc();
     window.addEventListener("resize", calc);
     return () => window.removeEventListener("resize", calc);
   }, []);
-
   return sizes;
 };
 
-// ─── Styles ───────────────────────────────────────────────────────────────────
-
-const CARD_STYLES = `
+const STYLES = `
   @keyframes reel-spin { to { transform: rotate(360deg); } }
+  @keyframes reel-glow {
+    0%, 100% { box-shadow: 0 0 20px rgba(204,244,127,0.2); }
+    50%       { box-shadow: 0 0 40px rgba(204,244,127,0.45); }
+  }
+
+  .reel-track {
+    display: flex;
+    align-items: center;
+    overflow-x: scroll;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding-bottom: 4px;
+  }
+  .reel-track::-webkit-scrollbar { display: none; }
+
+  .reel-snap-item {
+    scroll-snap-align: center;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
 
   .reel-card {
-    transition: transform 0.4s cubic-bezier(.4,0,.2,1), opacity 0.4s ease, filter 0.4s ease;
+    transition: transform 0.45s cubic-bezier(.4,0,.2,1),
+                opacity   0.45s ease,
+                filter    0.45s ease;
     cursor: pointer;
     position: relative;
     flex-shrink: 0;
-    border-radius: clamp(12px, 2vw, 18px);
+    border-radius: 16px;
     overflow: hidden;
   }
-  .reel-card:focus-visible { outline: 2px solid #F7E328; outline-offset: 3px; }
+  .reel-card:focus-visible { outline: 2px solid #CCF47F; outline-offset: 3px; }
 
   .reel-card img {
     width: 100%; height: 100%; object-fit: cover;
@@ -76,58 +85,58 @@ const CARD_STYLES = `
   .reel-overlay {
     position: absolute; inset: 0;
     border-radius: inherit;
-    background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 45%, transparent 70%);
+    background: linear-gradient(
+      to top,
+      rgba(0,0,0,0.88) 0%,
+      rgba(0,0,0,0.25) 50%,
+      transparent 75%
+    );
   }
 
   .reel-title {
     position: absolute; bottom: 0; right: 0; left: 0;
-    padding: clamp(10px, 2vw, 16px) clamp(8px, 1.5vw, 14px) clamp(12px, 2vw, 18px);
+    padding: 12px 12px 16px;
     color: #fff; font-weight: 700;
-    line-height: 1.35; text-shadow: 0 1px 6px rgba(0,0,0,0.5);
+    line-height: 1.4; text-shadow: 0 1px 8px rgba(0,0,0,0.6);
     display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden;
   }
 
   .reel-placeholder {
     width: 100%; height: 100%; display: flex;
     align-items: center; justify-content: center;
-    background: #1a1a1a; font-size: 2rem; color: rgba(255,255,255,0.15);
+    background: #1a1a1a; color: rgba(255,255,255,0.1);
   }
 
   .reel-play-badge {
-    position: absolute; top: clamp(8px, 1.5vw, 12px); left: clamp(8px, 1.5vw, 12px);
-    width: clamp(26px, 3.5vw, 34px); height: clamp(26px, 3.5vw, 34px);
+    position: absolute;
+    top: 10px; left: 10px;
+    width: 30px; height: 30px;
     border-radius: 50%;
-    background: rgba(0,0,0,0.55); border: 1.5px solid rgba(255,255,255,0.25);
+    background: rgba(0,0,0,0.5);
+    border: 1.5px solid rgba(255,255,255,0.15);
     display: flex; align-items: center; justify-content: center;
-    backdrop-filter: blur(4px); transition: background 0.15s;
+    backdrop-filter: blur(6px);
+    transition: background 0.2s, border-color 0.2s;
   }
-  .reel-card:hover .reel-play-badge { background: rgba(247,227,40,0.85); border-color: #F7E328; }
-  .reel-card:hover .reel-play-badge svg { fill: #161616; }
-
-  .reel-nav-btn {
-    width: clamp(32px, 4.5vw, 42px);
-    height: clamp(32px, 4.5vw, 42px);
-    border-radius: 50%; border: none;
-    display: flex; align-items: center; justify-content: center;
-    cursor: pointer; transition: background 0.15s, transform 0.1s; flex-shrink: 0;
-    background: rgba(255,255,255,0.08); color: #FCF2ED;
+  .reel-card-hero .reel-play-badge {
+    background: rgba(204,244,127,0.15);
+    border-color: rgba(204,244,127,0.5);
   }
-  .reel-nav-btn:hover { background: rgba(255,255,255,0.15); transform: scale(1.05); }
-  .reel-nav-btn:disabled { opacity: 0.25; cursor: default; transform: none; }
+  .reel-card:hover .reel-play-badge {
+    background: #CCF47F;
+    border-color: #CCF47F;
+  }
+  .reel-card:hover .reel-play-badge svg { fill: #121212; }
 
   .reel-dot {
-    width: clamp(5px, 1vw, 6px);
-    height: clamp(5px, 1vw, 6px);
-    border-radius: 50%; flex-shrink: 0;
-    transition: background 0.2s, transform 0.2s; cursor: pointer; border: none;
-    padding: 0;
+    height: 3px; border-radius: 99px;
+    flex-shrink: 0; cursor: pointer; border: none; padding: 0;
+    transition: width 0.3s ease, background 0.3s ease, opacity 0.3s ease;
   }
 `;
 
-// ─── Sub-components ───────────────────────────────────────────────────────────
-
-const PlayIcon = ({ size = 14 }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="white" stroke="none">
+const PlayIcon = ({ size = 13 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="white">
     <polygon points="5 3 19 12 5 21 5 3" />
   </svg>
 );
@@ -135,33 +144,28 @@ const PlayIcon = ({ size = 14 }) => (
 const ReelCard = ({ reel, diff, onClick, onKeyDown, sizes }) => {
   const isHero = diff === 0;
   const isNear = Math.abs(diff) === 1;
-
-  const thumb = reel.thumbnail || getYoutubeThumbnail(reel.youtubeUrl);
+  const thumb  = reel.thumbnail || getYoutubeThumbnail(reel.youtubeUrl);
   const w = isHero ? sizes.hero.w : sizes.card.w;
   const h = isHero ? sizes.hero.h : sizes.card.h;
 
-  // نسبة العرض/الارتفاع دايمًا 9:16
   const style = {
-    width: w,
-    height: h,   // 9:16 ratio
-    transform: `scale(${isHero ? 1 : isNear ? 0.88 : 0.76})`,
-    opacity: isHero ? 1 : isNear ? 0.75 : 0.45,
-    filter: isHero ? "none" : `brightness(${isNear ? 0.7 : 0.5})`,
-    zIndex: isHero ? 10 : isNear ? 5 : 2,
-    boxShadow: isHero ? "0 24px 60px rgba(0,0,0,0.55)" : "none",
-    border: isHero ? "2px solid rgba(247,227,40,0.35)" : "none",
+    width:     w,
+    height:    h,
+    transform: `scale(${isHero ? 1 : isNear ? 0.87 : 0.74})`,
+    opacity:   isHero ? 1 : isNear ? 0.7 : 0.4,
+    filter:    isHero ? "none" : `brightness(${isNear ? 0.65 : 0.45})`,
+    zIndex:    isHero ? 10 : isNear ? 5 : 2,
+    border:    isHero ? "1.5px solid rgba(204,244,127,0.3)" : "1.5px solid transparent",
+    animation: isHero ? "reel-glow 3s ease-in-out infinite" : "none",
+    boxShadow: isHero ? "0 20px 50px rgba(0,0,0,0.6)" : "none",
   };
-
-  const iconSize = isHero
-    ? Math.max(12, Math.round(sizes.hero.w * 0.065))
-    : Math.max(10, Math.round(sizes.card.w * 0.06));
 
   return (
     <div
       role="button"
       tabIndex={0}
       aria-label={reel.title}
-      className="reel-card"
+      className={`reel-card${isHero ? " reel-card-hero" : ""}`}
       onClick={onClick}
       onKeyDown={onKeyDown}
       style={style}
@@ -169,78 +173,52 @@ const ReelCard = ({ reel, diff, onClick, onKeyDown, sizes }) => {
       {thumb ? (
         <img src={thumb} alt={reel.title} draggable={false} />
       ) : (
-        <div className="reel-placeholder">▶</div>
+        <div className="reel-placeholder">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="rgba(255,255,255,0.1)">
+            <polygon points="5 3 19 12 5 21 5 3" />
+          </svg>
+        </div>
       )}
 
       <div className="reel-overlay" />
-
       <div className="reel-play-badge">
-        <PlayIcon size={iconSize} />
+        <PlayIcon size={isHero ? 13 : 11} />
       </div>
+
+      {isHero && (
+        <div style={{
+          position: "absolute", top: 10, right: 10,
+          background: "#CCF47F", borderRadius: 99,
+          padding: "2px 8px",
+          fontSize: "0.6rem", fontWeight: 700,
+          color: "#121212", letterSpacing: "0.08em",
+          textTransform: "uppercase",
+        }}>
+          {reel.duration || "SHORT"}
+        </div>
+      )}
 
       {(isHero || isNear) && (
         <div
           className="reel-title"
           style={{
-            fontSize: isHero
-              ? `clamp(0.75rem, ${sizes.hero.w * 0.045}px, 1rem)`
-              : `clamp(0.65rem, ${sizes.card.w * 0.042}px, 0.8rem)`,
+            fontSize: isHero ? "0.82rem" : "0.68rem",
             WebkitLineClamp: isHero ? 3 : 2,
           }}
         >
           {reel.title}
         </div>
       )}
-
-      {isHero && (
-        <div
-          style={{
-            position: "absolute", inset: -3,
-            borderRadius: "calc(clamp(12px, 2vw, 18px) + 3px)",
-            border: "2px solid rgba(247,227,40,0.5)",
-            pointerEvents: "none",
-            boxShadow: "0 0 32px rgba(247,227,40,0.18)",
-          }}
-        />
-      )}
     </div>
   );
 };
 
-const NavButtons = ({ active, total, dir, onPrev, onNext, labels }) => (
-  <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-    <button className="reel-nav-btn" onClick={onPrev} disabled={active === 0} aria-label={labels.previous}>
-      <i className={`fa-solid fa-chevron-${dir === "rtl" ? "right" : "left"}`} style={{ fontSize: "clamp(0.7rem, 1.5vw, 0.85rem)" }} />
-    </button>
-    <button className="reel-nav-btn" onClick={onNext} disabled={active === total - 1} aria-label={labels.next}>
-      <i className={`fa-solid fa-chevron-${dir === "rtl" ? "left" : "right"}`} style={{ fontSize: "clamp(0.7rem, 1.5vw, 0.85rem)" }} />
-    </button>
-  </div>
-);
-
-const DotIndicators = ({ count, active, onSelect, label }) => (
-  <div style={{ display: "flex", justifyContent: "center", gap: "clamp(4px, 1vw, 6px)", marginTop: "clamp(14px, 2.5vw, 20px)", flexWrap: "wrap" }}>
-    {Array.from({ length: count }, (_, idx) => (
-      <button
-        key={idx}
-        className="reel-dot"
-        onClick={() => onSelect(idx)}
-        aria-label={`${label} ${idx + 1}`}
-        style={{
-          background: idx === active ? "#F7E328" : "rgba(255,255,255,0.2)",
-          transform: idx === active ? "scale(1.4)" : "scale(1)",
-        }}
-      />
-    ))}
-  </div>
-);
-
 const Spinner = () => (
   <section style={{ padding: "40px 0", textAlign: "center" }}>
     <div style={{
-      width: 28, height: 28, margin: "0 auto",
-      border: "2px solid rgba(247,227,40,0.2)",
-      borderTopColor: "#F7E328",
+      width: 26, height: 26, margin: "0 auto",
+      border: "2px solid rgba(204,244,127,0.15)",
+      borderTopColor: "#CCF47F",
       borderRadius: "50%",
       animation: "reel-spin 0.8s linear infinite",
     }} />
@@ -248,23 +226,23 @@ const Spinner = () => (
   </section>
 );
 
-// ─── Main Component ───────────────────────────────────────────────────────────
+// ─── Inner (remounts on lang/category change via key) ─────────────────────────
 
-const ReelsSection = () => {
-  const { lang, t, dir } = useLanguage();
+const ReelsSectionInner = ({ lang, t, dir, category }) => {
   const navigate = useNavigate();
-  const sizes = useReelSizes();
+  const sizes    = useReelSizes();
 
-  const [reels, setReels] = useState([]);
+  const [reels,   setReels]   = useState([]);
   const [loading, setLoading] = useState(true);
-  const [active, setActive] = useState(0);
-  const [dragging, setDragging] = useState(false);
-  const dragStartX = useRef(0);
+  const [active,  setActive]  = useState(0);
 
+  const trackRef = useRef(null);
+  const itemRefs = useRef([]);
+
+  // ✅ بيبعت category للـ API لو موجود، لو لأ يجيب الكل
   useEffect(() => {
     setLoading(true);
-    api
-      .getReels(lang)
+    api.getReels(lang, 1, category || "")
       .then((res) => {
         const data = res.reels || [];
         setReels(data);
@@ -272,120 +250,173 @@ const ReelsSection = () => {
       })
       .catch(() => setReels([]))
       .finally(() => setLoading(false));
-  }, [lang]);
+  }, [lang, category]);
 
-  const prev = useCallback(() => setActive((a) => Math.max(0, a - 1)), []);
-  const next = useCallback(() => setActive((a) => Math.min(reels.length - 1, a + 1)), [reels.length]);
+  const scrollToActive = useCallback((idx) => {
+    const track = trackRef.current;
+    const item  = itemRefs.current[idx];
+    if (!track || !item) return;
+    const trackRect = track.getBoundingClientRect();
+    const itemRect  = item.getBoundingClientRect();
+    const offset =
+      item.offsetLeft -
+      track.offsetLeft -
+      (trackRect.width / 2) +
+      (itemRect.width / 2);
+    track.scrollTo({ left: offset, behavior: "smooth" });
+  }, []);
+
+  useEffect(() => { scrollToActive(active); }, [active, scrollToActive]);
+
+  useEffect(() => {
+    const track = trackRef.current;
+    if (!track) return;
+    let timeout;
+    const onScroll = () => {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => {
+        const trackCenter = track.scrollLeft + track.clientWidth / 2;
+        let closest = 0, minDist = Infinity;
+        itemRefs.current.forEach((el, idx) => {
+          if (!el) return;
+          const elCenter = el.offsetLeft - track.offsetLeft + el.offsetWidth / 2;
+          const dist = Math.abs(trackCenter - elCenter);
+          if (dist < minDist) { minDist = dist; closest = idx; }
+        });
+        setActive(closest);
+      }, 80);
+    };
+    track.addEventListener("scroll", onScroll, { passive: true });
+    return () => { track.removeEventListener("scroll", onScroll); clearTimeout(timeout); };
+  }, [reels]);
+
+  const prev = useCallback(() => setActive(a => Math.max(0, a - 1)), []);
+  const next = useCallback(() => setActive(a => Math.min(reels.length - 1, a + 1)), [reels.length]);
 
   useEffect(() => {
     const onKey = (e) => {
-      if (e.key === "ArrowLeft") prev();
-      if (e.key === "ArrowRight") next();
+      if (e.key === "ArrowLeft")  dir === "rtl" ? next() : prev();
+      if (e.key === "ArrowRight") dir === "rtl" ? prev() : next();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [prev, next]);
-
-  const handleDragStart = (e) => {
-    dragStartX.current = e.clientX ?? e.touches?.[0]?.clientX ?? 0;
-    setDragging(true);
-  };
-
-  const handleDragEnd = (e) => {
-    if (!dragging) return;
-    const endX = e.clientX ?? e.changedTouches?.[0]?.clientX ?? 0;
-    const diff = dragStartX.current - endX;
-    if (Math.abs(diff) > 40) diff > 0 ? next() : prev();
-    setDragging(false);
-  };
-
-  // الـ gap متجاوب
-  const gap = Math.max(8, Math.round(sizes.card.w * 0.075));
+  }, [prev, next, dir]);
 
   if (loading) return <Spinner />;
   if (!reels.length) return null;
 
+  const gap     = Math.max(8, Math.round(sizes.card.w * 0.07));
+  const sidePad = `calc(50% - ${sizes.hero.w / 2}px)`;
+
   return (
-    <section
-      dir={dir}
-      style={{
-        padding: "clamp(24px, 4vw, 40px) 0 clamp(28px, 5vw, 48px)",
-        fontFamily: "Lyon, serif",
-        position: "relative",
-        overflow: "hidden",
-      }}
-    >
-      <style>{CARD_STYLES}</style>
-
-      {/* Header */}
-      <div style={{
-        display: "flex", alignItems: "center", justifyContent: "space-between",
-        marginBottom: "clamp(16px, 3vw, 28px)", padding: "0 4px",
-      }}>
-        <div>
-          <h2 style={{
-            color: "#FCF2ED", fontWeight: 800,
-            fontSize: "clamp(1.1rem, 3vw, 1.75rem)",
-            margin: 0, fontFamily: "Lyon, serif",
-          }}>
-            {t.reels.title}
-          </h2>
-          <div style={{ height: 3, width: 48, background: "#F7E328", borderRadius: 2, marginTop: 6 }} />
-        </div>
-
-        <NavButtons
-          active={active}
-          total={reels.length}
-          dir={dir}
-          onPrev={prev}
-          onNext={next}
-          labels={{ previous: t.reels.previous, next: t.reels.next }}
-        />
-      </div>
-
-      {/* Track */}
+    <>
       <div
+        ref={trackRef}
+        className="reel-track"
         style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
           gap,
-          padding: "clamp(12px, 2vw, 20px) 0 clamp(16px, 2.5vw, 24px)",
-          userSelect: "none",
-          touchAction: "pan-y",
-          // نخلي الـ overflow مخفي علشان الكروت اللي برا ما تظهرش
-          overflow: "hidden",
-          width: "100%",
+          paddingLeft:   sidePad,
+          paddingRight:  sidePad,
+          paddingTop:    "clamp(12px, 2vw, 20px)",
+          paddingBottom: "clamp(16px, 2.5vw, 24px)",
         }}
-        onMouseDown={handleDragStart}
-        onMouseUp={handleDragEnd}
-        onMouseLeave={() => setDragging(false)}
-        onTouchStart={handleDragStart}
-        onTouchEnd={handleDragEnd}
       >
         {reels.map((reel, idx) => {
           const diff = idx - active;
-          if (Math.abs(diff) > 3) return null;
-
           return (
-            <ReelCard
+            <div
               key={reel._id}
-              reel={reel}
-              diff={diff}
-              sizes={sizes}
-              onClick={() => (diff === 0 ? navigate(`/reel/${reel._id}`) : setActive(idx))}
-              onKeyDown={(e) => e.key === "Enter" && (diff === 0 ? navigate(`/reel/${reel._id}`) : setActive(idx))}
-            />
+              ref={el => itemRefs.current[idx] = el}
+              className="reel-snap-item"
+              style={{
+                width:  idx === active ? sizes.hero.w : sizes.card.w,
+                height: idx === active ? sizes.hero.h : sizes.card.h,
+              }}
+            >
+              <ReelCard
+                reel={reel}
+                diff={diff}
+                sizes={sizes}
+                onClick={() => diff === 0 ? navigate(`/reel/${reel._id}`) : setActive(idx)}
+                onKeyDown={e => e.key === "Enter" && (diff === 0 ? navigate(`/reel/${reel._id}`) : setActive(idx))}
+              />
+            </div>
           );
         })}
       </div>
 
-      {/* Dots */}
-      <DotIndicators
-        count={reels.length}
-        active={active}
-        onSelect={setActive}
-        label={t.reels.shortClip}
+      <div style={{
+        display: "flex", justifyContent: "center",
+        alignItems: "center", gap: 4,
+        marginTop: "clamp(12px, 2vw, 18px)", flexWrap: "wrap",
+      }}>
+        {reels.map((_, idx) => {
+          const isAct = idx === active;
+          const dist  = Math.abs(idx - active);
+          return (
+            <button
+              key={idx}
+              className="reel-dot"
+              onClick={() => setActive(idx)}
+              aria-label={`${t.reels.shortClip} ${idx + 1}`}
+              style={{
+                width:      isAct ? 20 : dist === 1 ? 6 : 4,
+                background: isAct ? "#CCF47F" : dist === 1 ? "rgba(204,244,127,0.35)" : "rgba(255,255,255,0.15)",
+                opacity:    dist > 4 ? 0 : 1,
+              }}
+            />
+          );
+        })}
+      </div>
+    </>
+  );
+};
+
+// ─── Main Export ──────────────────────────────────────────────────────────────
+
+// category prop اختياري:
+//   بدونه  → يجيب كل الريلز (الصفحة الرئيسية)
+//   'technology' → ريلز تكنولوجي  (TechPage)
+//   'social'     → ريلز اجتماعي   (SocialPage)
+//   'cultural'   → ريلز ثقافي     (HorizonsPage)
+
+const ReelsSection = ({ category }) => {
+  const { lang, t, dir } = useLanguage();
+
+  return (
+    <section
+      dir={dir}
+      style={{ padding: "clamp(24px, 4vw, 40px) 0 clamp(28px, 5vw, 48px)", position: "relative" }}
+    >
+      <style>{STYLES}</style>
+
+      <div style={{
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        marginBottom: "clamp(16px, 3vw, 28px)", padding: "0 2px",
+      }}>
+        <div>
+          <h2 style={{
+            color: "#FCF2ED", fontWeight: 800,
+            fontSize: "clamp(1.1rem, 3vw, 1.65rem)",
+            margin: 0, fontFamily: "Lyon, serif",
+          }}>
+            {t.reels.title}
+          </h2>
+          <div style={{
+            height: 3, width: 36,
+            background: "#CCF47F",
+            borderRadius: 99, marginTop: 6,
+          }} />
+        </div>
+      </div>
+
+      {/* key يشمل category كمان عشان يعمل remount لما يتغير */}
+      <ReelsSectionInner
+        key={`${lang}-${category || "all"}`}
+        lang={lang}
+        t={t}
+        dir={dir}
+        category={category}
       />
     </section>
   );

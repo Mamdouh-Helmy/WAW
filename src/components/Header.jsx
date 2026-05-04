@@ -206,7 +206,7 @@ const Header = () => {
   const navItems = [
     { path: '/',         label: t.nav.home,     color: 'lime',     dropdown: null },
     { path: '/tech',     label: t.nav.tech,     color: 'blue',     dropdown: 'tech' },
-    { path: '/horizons', label: t.nav.horizons, color: 'yellow',   dropdown: 'horizons' },
+    { path: '/cultural', label: t.nav.horizons, color: 'yellow',   dropdown: 'cultural' },
     { path: '/social',   label: t.nav.social,   color: 'red',      dropdown: 'social' },
     { path: '/podcast',  label: t.nav.podcast,  color: 'phosphor', dropdown: null },
   ];

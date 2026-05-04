@@ -9,7 +9,7 @@ import ErrorMessage from '../components/ErrorMessage';
 const tagColors = {
   tech: 'bg-[#4469F2] text-white', horizons: 'bg-[#F7E328] text-black',
   social: 'bg-[#E20E3C] text-white', podcast: 'bg-[#CCF47F] text-black',
-  home: 'bg-white/10 text-white',
+  home: 'bg-[#CCF47F] text-black',
 };
 
 const typeIcons = { video: 'fa-play', images: 'fa-image', article: 'fa-file-lines' };
@@ -69,13 +69,10 @@ const AllArticlesPage = () => {
               >
                 <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60" />
                 <div className={`relative z-10 flex items-start justify-between ${dir === 'ltr' ? 'flex-row' : 'flex-row-reverse'}`}>
-                  {/* <span className="bg-black/50 text-white text-xs px-2 py-1 rounded-full backdrop-blur-sm flex items-center gap-1.5">
-                    <i className={`fa-solid ${typeIcons[card.type] || 'fa-file-lines'}`} />
-                    {card.type}
-                  </span>
+                  
                   <span className={`text-xs px-2 py-1 rounded-full font-bold ${tagColors[card.category] || tagColors.home}`}>
-                    {card.category}
-                  </span> */}
+                    {t.categories[card.category]}
+                  </span> 
                 </div>
               </div>
               <div className={`p-4 ${dir === 'ltr' ? 'text-left' : 'text-right'}`}>

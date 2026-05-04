@@ -47,86 +47,147 @@ const SubNav = () => {
           width: '700px',
           display: 'flex',
           alignItems: 'center',
-          overflowX: 'auto',
-          overflowY: 'hidden',
-          scrollbarWidth: 'none',
-          msOverflowStyle: 'none',
           paddingInline: '16px',
-          maskImage: 'linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)',
-          WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%)',
+          gap: '10px',
+          overflow: 'hidden',
         }}
       >
-        <ul
-          className="subnav-track"
+        {/* ── Fixed label + arrow ── */}
+        <div
           style={{
             display: 'flex',
-            gap: '10px',
             alignItems: 'center',
-            whiteSpace: 'nowrap',
-            margin: '0 auto',
-            padding: 0,
-            listStyle: 'none',
+            gap: '6px',
+            flexShrink: 0,
           }}
         >
-          {tags.map((item, index) => {
-            const label = item.tag;
-            const isActive = activeTag === label && location.pathname === '/tag-results';
+          <span
+            style={{
+              fontFamily: 'Lyon, serif',
+              fontSize: '0.72rem',
+              color: 'rgba(137,137,137,0.55)',
+              whiteSpace: 'nowrap',
+              letterSpacing: '0.02em',
+            }}
+          >
+            {language === 'ar' ? 'الأكْثَر رَوَاجاً' : 'Most Popular'}
+             
+          </span>
 
-            return (
-              <li
-                key={`${label}-${index}`}
-                style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: '10px' }}
-              >
-                <button
-                  onClick={() => handleTagClick(label)}
-                  style={{
-                    fontFamily: 'Lyon, serif',
-                    fontSize: '0.8rem',
-                    fontWeight: 500,
-                    padding: '4px 14px',
-                    borderRadius: '999px',
-                    border: isActive ? '1px solid #CCF47F' : '1px solid rgba(137,137,137,0.3)',
-                    background: isActive ? '#CCF47F' : 'transparent',
-                    color: isActive ? '#161616' : '#898989',
-                    cursor: 'pointer',
-                    letterSpacing: '0.01em',
-                    transition: 'border-color 0.15s, color 0.15s, background 0.15s',
-                    whiteSpace: 'nowrap',
-                    lineHeight: 1,
-                  }}
-                  onMouseEnter={e => {
-                    if (!isActive) {
-                      e.currentTarget.style.borderColor = 'rgba(252,242,237,0.35)';
-                      e.currentTarget.style.color = '#FCF2ED';
-                    }
-                  }}
-                  onMouseLeave={e => {
-                    if (!isActive) {
-                      e.currentTarget.style.borderColor = 'rgba(137,137,137,0.3)';
-                      e.currentTarget.style.color = '#898989';
-                    }
-                  }}
+          {/* Arrow — thin SVG chevron */}
+          <svg
+            width="12"
+            height="12"
+            viewBox="0 0 12 12"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+            style={{ flexShrink: 0, opacity: 0.35 }}
+          >
+            <path
+              d="M4 2.5L7.5 6L4 9.5"
+              stroke="#FCF2ED"
+              strokeWidth="1.2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </div>
+
+        {/* Thin divider */}
+        <span
+          style={{
+            width: '1px',
+            height: '14px',
+            background: 'rgba(137,137,137,0.2)',
+            flexShrink: 0,
+          }}
+        />
+
+        {/* ── Scrollable tags ── */}
+        <div
+          style={{
+            flex: 1,
+            overflow: 'hidden',
+            maskImage: 'linear-gradient(to right, black 80%, transparent 100%)',
+            WebkitMaskImage: 'linear-gradient(to right, black 80%, transparent 100%)',
+          }}
+        >
+          <ul
+            className="subnav-track"
+            style={{
+              display: 'flex',
+              gap: '10px',
+              alignItems: 'center',
+              whiteSpace: 'nowrap',
+              margin: 0,
+              padding: 0,
+              listStyle: 'none',
+              overflowX: 'auto',
+              overflowY: 'hidden',
+              scrollbarWidth: 'none',
+              msOverflowStyle: 'none',
+            }}
+          >
+            {tags.map((item, index) => {
+              const label = item.tag;
+              const isActive = activeTag === label && location.pathname === '/tag-results';
+
+              return (
+                <li
+                  key={`${label}-${index}`}
+                  style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: '10px' }}
                 >
-                  {label}
-                </button>
-
-                {index < tags.length - 1 && (
-                  <span
-                    aria-hidden
+                  <button
+                    onClick={() => handleTagClick(label)}
                     style={{
-                      display: 'inline-block',
-                      width: '3px',
-                      height: '3px',
-                      borderRadius: '50%',
-                      background: 'rgba(137,137,137,0.25)',
-                      flexShrink: 0,
+                      fontFamily: 'Lyon, serif',
+                      fontSize: '0.8rem',
+                      fontWeight: 500,
+                      padding: '4px 14px',
+                      borderRadius: '999px',
+                      border: isActive ? '1px solid #CCF47F' : '1px solid rgba(137,137,137,0.3)',
+                      background: isActive ? '#CCF47F' : 'transparent',
+                      color: isActive ? '#161616' : '#898989',
+                      cursor: 'pointer',
+                      letterSpacing: '0.01em',
+                      transition: 'border-color 0.15s, color 0.15s, background 0.15s',
+                      whiteSpace: 'nowrap',
+                      lineHeight: 1,
                     }}
-                  />
-                )}
-              </li>
-            );
-          })}
-        </ul>
+                    onMouseEnter={e => {
+                      if (!isActive) {
+                        e.currentTarget.style.borderColor = 'rgba(252,242,237,0.35)';
+                        e.currentTarget.style.color = '#FCF2ED';
+                      }
+                    }}
+                    onMouseLeave={e => {
+                      if (!isActive) {
+                        e.currentTarget.style.borderColor = 'rgba(137,137,137,0.3)';
+                        e.currentTarget.style.color = '#898989';
+                      }
+                    }}
+                  >
+                    {label}
+                  </button>
+
+                  {index < tags.length - 1 && (
+                    <span
+                      aria-hidden
+                      style={{
+                        display: 'inline-block',
+                        width: '3px',
+                        height: '3px',
+                        borderRadius: '50%',
+                        background: 'rgba(137,137,137,0.25)',
+                        flexShrink: 0,
+                      }}
+                    />
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        </div>
       </div>
     </div>
   );

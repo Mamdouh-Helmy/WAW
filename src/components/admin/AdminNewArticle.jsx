@@ -10,7 +10,7 @@ const TYPES      = ['article', 'video', 'images'];
 const CATEGORY_META = {
   home:         { color: '#CCF47F', label: 'الرئيسية' },
   tech:         { color: '#4469F2', label: 'تقنية' },
-  horizons:     { color: '#F7E328', label: 'آفاق' },
+  horizons:     { color: '#F7E328', label: 'ثقافي' },
   social:       { color: '#E20E3C', label: 'اجتماعي' },
   podcast:      { color: '#CCF47F', label: 'بودكاست' },
   documentary:  { color: '#5EEAD4', label: 'وثائقي' },
