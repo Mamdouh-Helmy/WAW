@@ -246,14 +246,14 @@ const ArticleCard = ({ article, language, activeTag }) => {
             <span>{article.author || ''}</span>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <span>◎ {article.views?.toLocaleString()}</span>
-              {article.publishedAt && (
+              {/* {article.publishedAt && (
                 <span>
                   {new Date(article.publishedAt).toLocaleDateString(
                     isRtl ? 'ar-EG' : 'en-US',
                     { month: 'short', day: 'numeric' }
                   )}
                 </span>
-              )}
+              )} */}
             </div>
           </div>
         </div>

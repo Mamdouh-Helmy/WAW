@@ -255,7 +255,7 @@ const ArticlePage = () => {
               {article.author && (
                 <InfoRow icon="fa-user" label={dir === 'rtl' ? 'الكاتب' : 'Author'} value={article.author} />
               )}
-              {article.publishedAt && (
+              {/* {article.publishedAt && (
                 <InfoRow
                   icon="fa-calendar"
                   label={dir === 'rtl' ? 'التاريخ' : 'Date'}
@@ -264,7 +264,7 @@ const ArticlePage = () => {
                     { year: 'numeric', month: 'long', day: 'numeric' }
                   )}
                 />
-              )}
+              )} */}
               {article.views !== undefined && (
                 <InfoRow icon="fa-eye" label={dir === 'rtl' ? 'المشاهدات' : 'Views'} value={article.views?.toLocaleString()} />
               )}

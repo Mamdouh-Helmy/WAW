@@ -79,12 +79,12 @@ const AllArticlesPage = () => {
                 <h3 className="font-bold text-lg text-[#FCF2ED] leading-tight" style={{ fontFamily: 'Lyon, serif' }}>
                   {card.title}
                 </h3>
-                {card.publishedAt && (
+                {/* {card.publishedAt && (
                   <p className="text-[#898989] text-xs mt-2">
                     <i className="fa-solid fa-clock mr-1" />
                     {new Date(card.publishedAt).toLocaleDateString(language === 'ar' ? 'ar-EG' : 'en-US')}
                   </p>
-                )}
+                )} */}
               </div>
             </Link>
           ))}

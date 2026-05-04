@@ -16,28 +16,9 @@ const HomePage = () => {
       {/* <MostReadSection /> */}
       <HeroVideo />
       <ReelsSection />
-
-      {/* ── أفلام تسجيلية ── جديد ──────────────────────────────── */}
       <DocumentarySection />
-
       <PodcastsSection />
-
       <MahsobaSection />
-
-      {/* <div className="flex flex-col items-start mb-6">
-        <h2
-          className="font-extrabold text-xl sm:text-2xl text-[#FCF2ED]"
-          style={{ fontFamily: 'Lyon, serif' }}
-        >
-          {t.categories.home}
-        </h2>
-        <div className="h-1 w-16 bg-[#CCF47F] rounded mt-1" />
-
-      </div> */}
-
-
-      {/* <MediaGrid categoryColor="lime" /> */}
-
       <ArticlesSection />
 
     </main>

@@ -188,12 +188,12 @@ const VideoPlayer = ({ reel, playing, onPlay, lang }) => {
               {reel.views.toLocaleString(lang === "ar" ? "ar-EG" : "en-US")}
             </span>
           )}
-          {reel.views && dateStr && (
+          {/* {reel.views && dateStr && (
             <span style={{ width: 3, height: 3, borderRadius: "50%", background: "#444", display: "inline-block" }} />
-          )}
-          {dateStr && (
+          )} */}
+          {/* {dateStr && (
             <span style={{ color: "#898989", fontSize: "0.78rem" }}>{dateStr}</span>
-          )}
+          )} */}
         </div>
       )}
     </div>
