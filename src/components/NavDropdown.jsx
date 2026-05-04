@@ -7,31 +7,31 @@ import { api } from '../services/api';
 ───────────────────────────────────────────────────────────── */
 const DROPDOWN_CONFIG = {
   tech: {
-    reelCategory:     'technology',
-    articleCategory:  'tech',
+    reelCategory: 'technology',
+    articleCategory: 'tech',
     excludeVideoType: false,   // tech يعرض كل أنواع المقالات
-    accentColor:      '#4469F2',
-    accentBg:         'rgba(68,105,242,0.12)',
-    accentBorder:     'rgba(68,105,242,0.25)',
-    labelAr:          'تكنولوجي',
+    accentColor: '#4469F2',
+    accentBg: 'rgba(68,105,242,0.12)',
+    accentBorder: 'rgba(68,105,242,0.25)',
+    labelAr: 'تكنولوجي',
   },
   cultural: {
-    reelCategory:     'cultural',
-    articleCategory:  'horizons',
+    reelCategory: 'cultural',
+    articleCategory: 'horizons',
     excludeVideoType: true,    // ثقافي يخفي مقالات نوعها video
-    accentColor:      '#F7E328',
-    accentBg:         'rgba(247,227,40,0.12)',
-    accentBorder:     'rgba(247,227,40,0.25)',
-    labelAr:          'ثقافي',
+    accentColor: '#F7E328',
+    accentBg: 'rgba(247,227,40,0.12)',
+    accentBorder: 'rgba(247,227,40,0.25)',
+    labelAr: 'ثقافي',
   },
   social: {
-    reelCategory:     'social',
-    articleCategory:  'social',
+    reelCategory: 'social',
+    articleCategory: 'social',
     excludeVideoType: false,
-    accentColor:      '#E20E3C',
-    accentBg:         'rgba(226,14,60,0.12)',
-    accentBorder:     'rgba(226,14,60,0.25)',
-    labelAr:          'اجتماعي',
+    accentColor: '#E20E3C',
+    accentBg: 'rgba(226,14,60,0.12)',
+    accentBorder: 'rgba(226,14,60,0.25)',
+    labelAr: 'اجتماعي',
   },
 };
 
@@ -43,10 +43,10 @@ const getYoutubeThumbnail = (url) => {
   try {
     const u = new URL(url);
     let id = null;
-    if (u.searchParams.get('v'))               id = u.searchParams.get('v');
-    else if (u.hostname === 'youtu.be')         id = u.pathname.slice(1);
+    if (u.searchParams.get('v')) id = u.searchParams.get('v');
+    else if (u.hostname === 'youtu.be') id = u.pathname.slice(1);
     else if (u.pathname.startsWith('/shorts/')) id = u.pathname.replace('/shorts/', '');
-    else if (u.pathname.startsWith('/embed/'))  id = u.pathname.replace('/embed/', '');
+    else if (u.pathname.startsWith('/embed/')) id = u.pathname.replace('/embed/', '');
     return id ? `https://img.youtube.com/vi/${id}/hqdefault.jpg` : null;
   } catch { return null; }
 };
@@ -60,7 +60,7 @@ const ReelCard = ({ reel, accentColor, navigate, language }) => {
 
   return (
     <div
-      onClick={() => navigate(`/reels/${reel._id}?lang=${language}`)}
+      onClick={() => navigate(`/reel/${reel._id}?lang=${language}`)}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
@@ -199,18 +199,18 @@ const ArticleRow = ({ article, accentColor, navigate, language }) => {
    NavDropdown — المكون الرئيسي
 ───────────────────────────────────────────────────────────── */
 const NavDropdown = ({ category, language, dir, children }) => {
-  const navigate    = useNavigate();
-  const config      = DROPDOWN_CONFIG[category];
+  const navigate = useNavigate();
+  const config = DROPDOWN_CONFIG[category];
   const containerRef = useRef(null);
 
-  const [open,     setOpen]     = useState(false);
-  const [reels,    setReels]    = useState([]);
+  const [open, setOpen] = useState(false);
+  const [reels, setReels] = useState([]);
   const [articles, setArticles] = useState([]);
-  const [loading,  setLoading]  = useState(false);
-  const [fetched,  setFetched]  = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [fetched, setFetched] = useState(false);
 
-  const hoverTimer  = useRef(null);
-  const leaveTimer  = useRef(null);
+  const hoverTimer = useRef(null);
+  const leaveTimer = useRef(null);
 
   /* جلب البيانات مرة واحدة بس عند أول hover */
   const fetchData = async () => {
@@ -226,7 +226,7 @@ const NavDropdown = ({ category, language, dir, children }) => {
 
       // فلتر المقالات: لو excludeVideoType = true نشيل اللي type = 'video'
       const allArticles = articlesRes.articles || [];
-      const filtered    = config.excludeVideoType
+      const filtered = config.excludeVideoType
         ? allArticles.filter(a => a.type !== 'video')
         : allArticles;
       setArticles(filtered.slice(0, 4));
@@ -265,7 +265,7 @@ const NavDropdown = ({ category, language, dir, children }) => {
   if (!config) return children;
 
   const { accentColor, accentBg, accentBorder, labelAr } = config;
-  const hasReels    = reels.length > 0;
+  const hasReels = reels.length > 0;
   const hasArticles = articles.length > 0;
 
   return (
