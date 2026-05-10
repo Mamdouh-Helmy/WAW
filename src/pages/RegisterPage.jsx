@@ -2,7 +2,7 @@ import { useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { api } from '../services/api';
-import logo from "../../public/Logo WAW.png";
+import logo from "../../public/Logo WAW.webp";
 
 // ── Validation ───────────────────────────────────────────────────────────────
 const emailRx    = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../services/api';
@@ -8,7 +8,7 @@ import AdminPodcasts from '../components/admin/AdminPodcasts';
 import AdminUsers from '../components/admin/AdminUsers';
 import AdminFooter from '../components/admin/AdminFooter';
 import AdminReels from '../components/admin/AdminReels';
-import logo from "../../public/Logo WAW.png";
+import logo from "../../public/Logo WAW.webp";
 
 /* ─── Nav config ─────────────────────────────────────────────────────────── */
 const NAV = [
