@@ -4,7 +4,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import { api } from '../services/api';
 import NavDropdown from './NavDropdown';
-import logo from "../../public/Logo WAW.webp";
+import logo from "../../public/Logo WAW.png";
 
 const BASE = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000';
 const avatarSrc = (path) => {

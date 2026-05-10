@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { api } from '../services/api';
-import logo from "../../public/Logo WAW.webp";
+import logo from "../../public/Logo WAW.png";
 
 const Footer = () => {
   const { t, language } = useLanguage();

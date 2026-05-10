@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
-import logo from "../../public/Logo WAW.webp";
+import logo from "../../public/Logo WAW.png";
 
 // ── simple client-side validation ──────────────────────────────────────────
 const validateForm = (form, isAr) => {

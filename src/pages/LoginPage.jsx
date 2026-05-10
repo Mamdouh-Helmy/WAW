@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
-import logo from "../../public/Logo WAW.webp";
+import logo from "../../public/Logo WAW.png";
 
 const schema = z.object({
   email: z
@@ -21,6 +21,7 @@ const schema = z.object({
 const LoginPage = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
+  const [showPass, setShowPass] = useState(false);
   const [roleError, setRoleError] = useState(false); // ← user tried to login as admin
 
   const {
@@ -39,7 +40,7 @@ const LoginPage = () => {
       // ✅ Role check — only admins allowed here
       if (user.role !== 'admin') {
         // logout the just-logged-in user so session isn't kept
-        await fetch('/api/auth/logout', { method: 'POST' }).catch(() => { });
+        await fetch('/api/auth/logout', { method: 'POST' }).catch(() => {});
         localStorage.removeItem('waw_token');
         setRoleError(true);
         reset({ email: data.email, password: '' });
@@ -219,7 +220,22 @@ const LoginPage = () => {
                     }}
                     onFocus={e => { e.target.style.borderColor = errors.password ? 'rgba(226,14,60,0.65)' : 'rgba(204,244,127,0.45)'; e.target.style.background = '#252525'; }}
                     onBlur={e => { e.target.style.borderColor = errors.password ? 'rgba(226,14,60,0.55)' : 'rgba(255,255,255,0.1)'; e.target.style.background = '#222'; }}
-                  />                </div>
+                  />
+                  {/* <button
+                    type="button"
+                    onClick={() => setShowPass(p => !p)}
+                    style={{
+                      position: 'absolute', top: '50%', transform: 'translateY(-50%)',
+                      left: 12, background: 'none', border: 'none',
+                      cursor: 'pointer', color: '#555', padding: 4,
+                      transition: 'color 0.15s', lineHeight: 1,
+                    }}
+                    onMouseEnter={e => e.currentTarget.style.color = '#aaa'}
+                    onMouseLeave={e => e.currentTarget.style.color = '#555'}
+                  >
+                    <i className={`fa-solid ${showPass ? 'fa-eye-slash' : 'fa-eye'}`} style={{ fontSize: 13 }} />
+                  </button> */}
+                </div>
                 {errors.password && (
                   <p style={{ fontSize: 11, color: '#E20E3C', marginTop: 5 }}>
                     <i className="fa-solid fa-circle-exclamation" style={{ marginLeft: 4, fontSize: 9 }} />
