@@ -1,5 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;800;900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:wght@400;700;800;900&display=swap");
 
 @tailwind base;
 @tailwind components;
@@ -37,7 +36,7 @@
 
 html {
     scroll-behavior: smooth;
-    overflow-x: hidden; /* ← منع الـ horizontal scroll */
+    overflow-x: hidden;
     max-width: 100%;
 }
 
@@ -46,7 +45,7 @@ body {
     min-width: 320px;
     min-height: 100vh;
     max-width: 100%;
-    overflow-x: hidden; /* ← منع الـ horizontal scroll */
+    overflow-x: hidden;
     background-color: #161616;
     color: #fcf2ed;
     font-family: "Ko Sans", "Inter", system-ui, sans-serif;
@@ -58,7 +57,6 @@ body {
     -moz-osx-font-smoothing: grayscale;
 }
 
-/* ← إزالة الـ padding والـ text-align من #root */
 #root {
     max-width: 100%;
     overflow-x: hidden;
@@ -125,5 +123,3 @@ h1, h2, h3, h4, h5, h6 {
 .text-secondary { color: #898989; }
 .bg-main        { background-color: #161616; }
 .bg-card        { background-color: #1e1e1e; }
-
-
